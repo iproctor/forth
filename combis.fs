@@ -1,3 +1,6 @@
+: v postpone >r ' compile, postpone r> ; immediate
+: v. postpone dup postpone v ; immediate
+
 : dip ( w xt -- w )
   swap >r
   execute
@@ -9,7 +12,7 @@
   2r> ;
 
 : keep ( w xt -- w )
-  swap >r r@
+  over >r
   execute
   r> ;
 

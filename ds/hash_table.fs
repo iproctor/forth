@@ -26,9 +26,7 @@ end-struct hash-table%
 
 : hash-table-new-zeroed-array ( n -- a-addr )
   dup cells allocate throw
-  swap 0 U+DO
-    0 over i cells + !
-  LOOP ;
+  dup rot cells erase ;
 
 \ n should be prime
 : new-hash-table ( n xt xt -- hash-table )
@@ -81,7 +79,7 @@ end-struct hash-table%
   ht hash-table-explode
   key val
   hash-table-raw-insert IF
-    ht hash-table-size dup @ 1+ swap !
+    1 ht hash-table-size +!
   THEN
   ht hash-table-maybe-resize ;
 
@@ -93,7 +91,7 @@ end-struct hash-table%
 : hash-table-remove ( w hash-table -- ) { key ht }
   key ht hash-table-key-slot >r
   key  ht hash-table-eq @  r@ @  assoc-remove IF
-    ht hash-table-size dup @ 1- swap ! THEN
+    -1 ht hash-table-size +! THEN
   r> ! ;
 
 : hash-table-lookup ( w hash-table -- w flag ) { key ht }
