@@ -4,3 +4,4 @@ require combis.fs
 : blank-str? ( c-addr u -- flag ) 0 U+DO dup i chars c@ 32 <> IF drop unloop false exit THEN LOOP drop true ;
 
 : r@2 ]] r> r@ swap >r [[ ; immediate
+: r+ ]] r> 1+ >r [[; immediate
