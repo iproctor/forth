@@ -4,9 +4,12 @@ require ../utils.fs
 require ./block.fs
 
 16 constant \grid
+\grid dup * allotz constant grid
 
-: allot-grid ( -- c-addr ) \grid dup * allotz ;
-: block-at ( col row grid -- c-addr ) >r \grid * + r> + ;
+: block-at ( col row -- c-addr ) \grid * + grid + ;
 : block-coords ( col row -- u u u ) ['] /block bi@  \grid *  v swap + ;
-: grid-to-block ( col row grid -- x y c-addr ) >r block-coords cells r> + ;
-: view-cell ( col row grid -- c-addr u ) grid-to-block @ dup 0= IF drop 2drop 0 0 exit THEN block-cell cell-to-str ;
+: grid->block ( col row -- x y c-addr ) block-coords cells grid + ;
+: grid->block! ( col row -- x y c-addr ) grid->block dup @ 0= IF
+    allot-block swap v. ! THEN ;
+: grid->cell ( col row -- c-addr ) grid->block @ dup 0= IF drop 2drop 0 0 exit THEN block->cell ;
+: grid->cell! ( cor row -- c-addr ) grid->block! block->cell ;
