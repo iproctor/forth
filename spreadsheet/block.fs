@@ -21,10 +21,12 @@ require ../ds/arrlist.fs
 
 : cell->val ( c-addr -- c-addr ) ;
 : cell->deps ( c-addr -- c-addr ) cell->val cell+ ;
-: push-cell-deps ( w w c-addr -- ) dup >r cell->data push-arrlist r> ! ;
-: cell->sz ( c-addr -- c-addr ) cell->deps cell+ ;
+: cell->type ( c-addr -- c-addr ) cell->deps cell+ ;
+: cell->sz ( c-addr -- c-addr ) cell->type char+ ;
 : cell->data ( c-addr -- c-addr ) cell->sz char+ ;
 : cell->str ( c-addr -- c-addr u ) v cell->data  cell->sz c@ ;
+
+: push-cell-deps ( w w c-addr -- ) dup >r cell->deps push-arrlist r> ! ;
 
 : 1+cell ( c-addr -- ) dup cell->sz c@ 1+ bound-cell swap c! ;
 : 1-cell ( c-addr -- ) dup cell->sz c@ 1- bound-cell swap c! ;
@@ -35,11 +37,3 @@ require ../ds/arrlist.fs
 : cell-del ( u c-addr -- ) dup 1-cell  cell-str-offset  dup char+ swap  rot cell-rem-len  cmove ;
 : shift-cell ( u c-addr -- ) cell-str-offset  dup char+  rot cell-rem-len  cmove> ;
 : cell-ins ( c u c-addr -- ) dup 1+cell  2dup shift-cell  cell->data + c! ;
-
-: cell-parse ( c-addr -- ) dup cell->str case
-    dup blank-str? ?of type:string endof
-    dup >float ?of over cell->val f!  type:num endof
-    dup parse-code ?of over cell->val !  type:code endof
-    type:string
-  0 endof
-  swap cell->type !
