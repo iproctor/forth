@@ -1,8 +1,12 @@
 require ../combis.fs
 require ../utils.fs
+require ../ds/list.fs
 require sheet.fs
 
-\ : mk+ ( n1 "name" -- ) ['] + >r :noname r> compile, POSTPONE ; ;
+0 VALUE cell-dependency-buffer
+: set-dep-buffer ['] cell-dependency-buffer >body ! ;
+: clear-deps 0 set-dep-buffer ;
+: push-dep ( u u -- ) cell-dependency-buffer list-prepend2 set-dep-buffer ;
 
 : ws? ( c -- flag ) bl = ;
 
@@ -52,14 +56,19 @@ require sheet.fs
   1- ;
 
 : parse-row ( c-addr u -- u ) dup >r  0. 2swap >number
-  dup r> = IF err:syntax throw THEN  2swap 0<> IF err:syntax throw THEN ;
+  dup r> = IF err:syntax throw THEN  2swap 0<> IF err:syntax throw THEN 1- ;
+
+: push-slice-deps ( u u u u -- ) { c1 r1 c2 r2 } c2 1+ c1 U+DO r2 1+ r1 U+DO i j push-dep LOOP LOOP ;
 
 : parse-slice-indices ( c-addr u -- c-addr u )
   [CHAR] [ pchr
-  parse-col POSTPONE literal  parse-row POSTPONE literal
+  parse-col dup POSTPONE literal -rot
+  parse-row dup POSTPONE literal -rot
   [CHAR] : pchr
-  parse-col POSTPONE literal  parse-row POSTPONE literal
-  [CHAR] ] pchr ;
+  parse-col dup POSTPONE literal -rot
+  parse-row dup POSTPONE literal -rot
+  [CHAR] ] pchr
+  2>r push-slice-deps 2r> ;
 
 : parse-slice ( c-addr u -- c-addr u ) parse-slice-indices POSTPONE grid->slice ;
 

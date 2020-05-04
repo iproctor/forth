@@ -1,7 +1,7 @@
 #! /usr/local/bin/gforth
 
-require ../test/test.fs
-require assoc_list.fs
+require ../../test/test.fs
+require ../assoc_list.fs
 
 10 plan
 

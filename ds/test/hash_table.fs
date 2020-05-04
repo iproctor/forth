@@ -1,8 +1,8 @@
 #! /usr/local/bin/gforth
 
-require ../test/test.fs
-require hash_fn.fs
-require hash_table.fs
+require ../../test/test.fs
+require ../hash_fn.fs
+require ../hash_table.fs
 
 10 plan
 
