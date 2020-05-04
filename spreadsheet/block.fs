@@ -24,7 +24,7 @@ require ../ds/arrlist.fs
 : cell->type ( c-addr -- c-addr ) cell->deps cell+ ;
 : cell->sz ( c-addr -- c-addr ) cell->type char+ ;
 : cell->data ( c-addr -- c-addr ) cell->sz char+ ;
-: cell->str ( c-addr -- c-addr u ) v cell->data  cell->sz c@ ;
+: cell->str ( c-addr -- c-addr u ) v. cell->data  cell->sz c@ ;
 
 : push-cell-deps ( w w c-addr -- ) dup >r cell->deps push-arrlist r> ! ;
 

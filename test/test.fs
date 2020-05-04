@@ -1,6 +1,6 @@
 \ TAP output
 
-Variable test# 
+Variable test#
 0 test# !
 
 : plan ( n -- )
@@ -39,7 +39,7 @@ Variable test#
 \ This is an idiom for running a bunch of tests in a stack frame.
 \ I've no idea whether this is a nice thing to do.
 
-Variable frame 
+Variable frame
 0 frame !
 
 : t{

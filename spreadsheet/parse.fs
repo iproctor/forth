@@ -40,11 +40,10 @@ require sheet.fs
   >r over c@ r> <> IF err:syntax throw THEN
   step-str ;
 
-: letter>num ( c -- u ) CASE
-    dup [CHAR] A [CHAR] Z within-range? true OF [CHAR] A - ENDOF
-    drop dup [CHAR] a [CHAR] z within-range? true OF [CHAR] a - ENDOF
-    2drop -1 0
-  ENDCASE 1+ ;
+: letter>num ( c -- u )
+    dup [CHAR] A [CHAR] Z within-range? IF [CHAR] A - ELSE
+    dup [CHAR] a [CHAR] z within-range? IF [CHAR] a - ELSE
+    drop -1 THEN THEN 1+ ;
 
 : parse-col ( c-addr u -- c-addr u u ) 0 >r BEGIN
     dup WHILE
@@ -60,13 +59,14 @@ require sheet.fs
 
 : push-slice-deps ( u u u u -- ) { c1 r1 c2 r2 } c2 1+ c1 U+DO r2 1+ r1 U+DO i j push-dep LOOP LOOP ;
 
+: save-index ( c-addr u u -- u c-addr u ) dup POSTPONE literal -rot ;
 : parse-slice-indices ( c-addr u -- c-addr u )
   [CHAR] [ pchr
-  parse-col dup POSTPONE literal -rot
-  parse-row dup POSTPONE literal -rot
+  parse-col save-index
+  parse-row save-index
   [CHAR] : pchr
-  parse-col dup POSTPONE literal -rot
-  parse-row dup POSTPONE literal -rot
+  parse-col save-index
+  parse-row save-index
   [CHAR] ] pchr
   2>r push-slice-deps 2r> ;
 
@@ -76,8 +76,10 @@ require sheet.fs
 
 : parse-var-indices ( c-addr u -- c-addr u )
   [CHAR] { pchr
-  parse-col POSTPONE literal  parse-row POSTPONE literal
-  [CHAR] } pchr ;
+  parse-col save-index
+  parse-row save-index
+  [CHAR] } pchr
+  2>r push-dep 2r> ;
 
 : parse-var ( c-addr u -- c-addr u ) parse-slice-indices POSTPONE grid->var ;
 
@@ -108,10 +110,10 @@ s" ss:" constant \func-prefix constant func-prefix
 
 : parse-code ( c-addr u -- xt ) step-str 2>r :noname 2r> parse-words POSTPONE ; ;
 
-: cell-parse ( c-addr -- ) dup cell->str CASE
-    2dup blank-str? true OF type:string ENDOF
-    drop 2dup >float true OF over cell->val f!  type:num ENDOF
-    drop over c@ [CHAR] = OF parse-code cell->val !  type:code ENDOF
-    drop type:string
-  0 ENDCASE
-  swap cell->type ! ;
+: cell-parse ( c-addr -- ) dup cell->str
+  2dup blank-str? IF 2drop type:string ELSE
+  2dup >float IF 2drop dup cell->val f!  type:num ELSE
+  over c@ [CHAR] = = IF parse-code over cell->val !  type:code ELSE
+  2drop type:string
+  THEN THEN THEN
+  swap cell->type c! ;
