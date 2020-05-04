@@ -22,9 +22,10 @@ require sheet.fs
 : numerical? ( c -- flag ) [CHAR] 0 [CHAR] 9 within-range? ;
 
 : parse-number ( c-addr u -- c-addr u )
+  2dup skip-until-ws 2>r r@ -
   >float 0= throw
-  skip-until-ws
-  POSTPONE fliteral ;
+  POSTPONE fliteral
+  2r> ;
 
 1 constant err:syntax
 2 constant err:eol
@@ -53,17 +54,25 @@ require sheet.fs
 : parse-row ( c-addr u -- u ) dup >r  0. 2swap >number
   dup r> = IF err:syntax throw THEN  2swap 0<> IF err:syntax throw THEN ;
 
-: parse-slice ( c-addr u -- c-addr u )
+: parse-slice-indices ( c-addr u -- c-addr u )
   [CHAR] [ pchr
   parse-col POSTPONE literal  parse-row POSTPONE literal
   [CHAR] : pchr
   parse-col POSTPONE literal  parse-row POSTPONE literal
-  [CHAR] ] pchr
-  POSTPONE grid->slice ;
+  [CHAR] ] pchr ;
 
-: parse-var ;
+: parse-slice ( c-addr u -- c-addr u ) parse-slice-indices POSTPONE grid->slice ;
 
-s" ss:" constant func-prefix constant \func-prefix
+: grid->var ;
+
+: parse-var-indices ( c-addr u -- c-addr u )
+  [CHAR] { pchr
+  parse-col POSTPONE literal  parse-row POSTPONE literal
+  [CHAR] } pchr ;
+
+: parse-var ( c-addr u -- c-addr u ) parse-slice-indices POSTPONE grid->var ;
+
+s" ss:" constant \func-prefix constant func-prefix
 : apply-func-prefix-here ( -- c-addr ) func-prefix \func-prefix here-append ;
 
 : prefix-func ( c-addr u -- c-addr u )
@@ -76,22 +85,24 @@ s" ss:" constant func-prefix constant \func-prefix
   prefix-func find-name dup 0= IF err:undef throw THEN
   name>int compile,  2r> ;
 
-: parse-words ( c-addr u -- c-addr u ) BEGIN
-    skip-ws  dup 0= IF exit THEN
-    over c@ CASE
-      dup [CHAR] [ of parse-slice ENDOF
-      dup [CHAR] { of parse-var ENDOF
-      dup numerical? true of parse-number ENDOF
-      parse-func
-    ENDCASE
-  AGAIN ;
+: <|> ( c-addr u xt xt -- c-addr u ) >r >r 2dup
+  r> catch IF 2drop r> execute ELSE rdrop 2swap 2drop THEN ;
 
-: parse-code ;
+: parse-words ( c-addr u -- ) BEGIN
+    skip-ws  dup 0<> WHILE
+    over c@ CASE
+      [CHAR] [ of parse-slice ENDOF
+      [CHAR] { of parse-var ENDOF
+      drop ['] parse-number ['] parse-func <|>
+    0 ENDCASE
+  REPEAT 2drop ;
+
+: parse-code ( c-addr u -- xt ) step-str 2>r :noname 2r> parse-words POSTPONE ; ;
 
 : cell-parse ( c-addr -- ) dup cell->str CASE
-    dup blank-str? true OF type:string ENDOF
-    drop dup >float true OF over cell->val f!  type:num ENDOF
-    drop dup parse-code true OF over cell->val !  type:code ENDOF
-    type:string
+    2dup blank-str? true OF type:string ENDOF
+    drop 2dup >float true OF over cell->val f!  type:num ENDOF
+    drop over c@ [CHAR] = OF parse-code cell->val !  type:code ENDOF
+    drop type:string
   0 ENDCASE
   swap cell->type ! ;
