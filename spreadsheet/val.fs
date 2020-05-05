@@ -1,4 +1,5 @@
 require sheet.fs
+require ../ds/list.fs
 
 0 constant val:const
 1 constant val:slice
@@ -14,7 +15,7 @@ require sheet.fs
 
 : const->value val->type cell+ ;
 : const->value@ const->value f@ ;
-: new-const-val ( r -- val ) 2 cells alloc-val  dup val:const swap val->type !  dup const->value f! ;
+: new-const-val ( r -- val ) 2 cells alloc-val  val:const over val->type !  dup const->value f! ;
 
 : slice->from val->type cell+ ;
 : slice->to slice->from 2 cells + ;
@@ -33,7 +34,18 @@ require sheet.fs
       i j grid->cell cell->val f@ v. execute
     LOOP LOOP ;
 
-: matrix-for-each ;
+: matrix->dim val->type cell+ ;
+: matrix->cols matrix->dim cell+ @ ;
+: matrix->data matrix->dim 2 cells + ;
+: matrix[] ( u u matrix -- r ) { cols rows matrix } matrix matrix->cols rows *  cols +  cells  matrix matrix->data + f@ ;
+: matrix-col-range ( matrix -- u u ) matrix->dim @ 0 ;
+: matrix-row-range ( matrix -- u u ) matrix->dim cell+ @ 0 ;
+: new-matrix ( u u -- val ) 2dup * 3 + cells alloc-val  val:matrix over val->type !  dup >r matrix->dim 2! r> ;
+
+: matrix-for-each ( ... xt matrix -- ... ) dup matrix-col-range U+DO
+    dup matrix-row-range U+DO
+      dup i j rot matrix[] >r v. execute r>
+    LOOP LOOP ;
 
 : val-for-each ( ... xt val -- ... ) dup val->type @ CASE
     val:const OF const->value@ swap execute ENDOF
