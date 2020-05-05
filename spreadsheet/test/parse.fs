@@ -12,7 +12,8 @@ s" a a" skip-until-ws s"  a" str= ok
 
 ." # parse-number" cr
 CHAR 1 numerical? ok
-: t [ s" 1.2" parse-number str-empty ] ; t 1.2e0 f= ok
+: t [ s" 1.2" parse-number str-empty ] ; t const->value@ 1.2e0 f= ok
+free-val-mem
 
 ." # pchr" cr
 s" ab" CHAR a pchr s" b" str= ok
@@ -51,13 +52,13 @@ s" ff" prefix-func s" ss:ff" str= ok
 tpf 123 =ok
 
 ." # parse-words" cr
-: ss:2* f2* ;
+: ss:2* ( val -- val ) const->value@ f2* new-const-val ;
 : tpw [ s" 2.1 2*" parse-words ] ;
-tpw 4.2e f= ok
+tpw const->value@ 4.2e f= ok free-val-mem
 
 ." # parse-code" cr
 : tpc s" =2.1 2*" parse-code ;
-tpc execute 4.2e f= ok
+tpc execute const->value@ 4.2e f= ok
 
 ." # cell-parse" cr
 allot-block constant test-blk
@@ -79,6 +80,6 @@ test-cell cell->val f@ 1.2e f= ok
 s" = 1.2 2*" test-cell str>cell
 test-cell cell-parse
 test-cell cell->type c@ type:code =ok
-test-cell cell->val @ execute 2.4e f= ok
+test-cell cell->val @ execute const->value@ 2.4e f= ok
 
 bye

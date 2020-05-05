@@ -1,6 +1,7 @@
 require ../combis.fs
 require ../utils.fs
 require ../ds/list.fs
+require val.fs
 require sheet.fs
 
 0 VALUE cell-dependency-buffer
@@ -28,7 +29,7 @@ require sheet.fs
 : parse-number ( c-addr u -- c-addr u )
   2dup skip-until-ws 2>r r@ -
   >float 0= throw
-  POSTPONE fliteral
+  POSTPONE fliteral POSTPONE new-const-val
   2r> ;
 
 1 constant err:syntax
@@ -60,28 +61,20 @@ require sheet.fs
 : push-slice-deps ( u u u u -- ) { c1 r1 c2 r2 } c2 1+ c1 U+DO r2 1+ r1 U+DO i j push-dep LOOP LOOP ;
 
 : save-index ( c-addr u u -- u c-addr u ) dup POSTPONE literal -rot ;
+: parse-coordinate ( c-addr u -- u u c-addr u) parse-col save-index  parse-row save-index ;
 : parse-slice-indices ( c-addr u -- c-addr u )
-  [CHAR] [ pchr
-  parse-col save-index
-  parse-row save-index
-  [CHAR] : pchr
-  parse-col save-index
-  parse-row save-index
-  [CHAR] ] pchr
+  [CHAR] [ pchr  parse-coordinate  [CHAR] : pchr  parse-coordinate  [CHAR] ] pchr
   2>r push-slice-deps 2r> ;
 
-: parse-slice ( c-addr u -- c-addr u ) parse-slice-indices POSTPONE grid->slice ;
+: parse-slice ( c-addr u -- c-addr u ) parse-slice-indices POSTPONE new-slice-val  ;
 
-: grid->var ;
+: grid->var ( u u -- ? ) 2dup new-slice-val ;
 
 : parse-var-indices ( c-addr u -- c-addr u )
-  [CHAR] { pchr
-  parse-col save-index
-  parse-row save-index
-  [CHAR] } pchr
+  [CHAR] { pchr  parse-coordinate  [CHAR] } pchr
   2>r push-dep 2r> ;
 
-: parse-var ( c-addr u -- c-addr u ) parse-slice-indices POSTPONE grid->var ;
+: parse-var ( c-addr u -- c-addr u ) parse-var-indices POSTPONE grid->var ;
 
 s" ss:" constant \func-prefix constant func-prefix
 : apply-func-prefix-here ( -- c-addr ) func-prefix \func-prefix here-append ;
@@ -113,7 +106,7 @@ s" ss:" constant \func-prefix constant func-prefix
 : cell-parse ( c-addr -- ) dup cell->str
   2dup blank-str? IF 2drop type:string ELSE
   2dup >float IF 2drop dup cell->val f!  type:num ELSE
-  over c@ [CHAR] = = IF parse-code over cell->val !  type:code ELSE
+  over c@ [CHAR] = = IF parse-code over cell->val !  cell-dependency-buffer over cell->deps !  clear-deps  type:code ELSE
   2drop type:string
   THEN THEN THEN
   swap cell->type c! ;
