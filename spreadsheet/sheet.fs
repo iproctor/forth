@@ -8,5 +8,5 @@ require grid.fs
     allot-block swap v. ! THEN ;
 
 : grid->cell ( col row -- c-addr ) grid->block @ dup 0= IF drop 2drop 0 0 exit THEN block->cell ;
-: grid->cell! ( col row -- c-addr ) grid->block! block->cell ;
+: grid->cell! ( col row -- c-addr ) grid->block! @ block->cell ;
 

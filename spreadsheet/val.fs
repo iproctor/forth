@@ -6,6 +6,8 @@ require sheet.fs
 1 constant val:slice
 2 constant val:matrix
 
+4 constant err:nonscalar
+
 : val->type ;
 
 : const->value val->type cell+ ;
@@ -20,6 +22,8 @@ require sheet.fs
 
 : slice-start-row ( slice -- u ) slice->from cell+ @ ;
 : slice-end-row ( slice -- u ) slice->to cell+ @ 1+ ;
+
+: slice-size ( slice -- u ) dup v. slice-end-col slice-start-col -  swap v. slice-end-row slice-start-row -  * ;
 
 : slice-col-range ( slice -- u u ) v. slice-end-col slice-start-col ;
 : slice-row-range ( slice -- u u ) v. slice-end-row slice-start-row ;
@@ -46,4 +50,16 @@ require sheet.fs
     val:const OF const->value@ swap execute ENDOF
     val:slice OF slice-for-each ENDOF
     val:matrix OF matrix-for-each ENDOF
+  ENDCASE ;
+
+: slice->scalar ( slice -- r ) dup slice-size 1 <> IF err:nonscalar throw THEN
+  slice->from 2@ grid->cell cell->val f@ ;
+
+: matrix->scalar ( matrix -- r ) dup matrix->dim 2@ >r 1 = r> 1 = and IF
+  0 0 rot matrix[] ELSE drop err:nonscalar throw THEN ;
+
+: val->scalar ( val -- r ) dup val->type @ CASE
+    val:const OF const->value@ ENDOF
+    val:slice OF slice->scalar ENDOF
+    val:matrix OF matrix->scalar ENDOF
   ENDCASE ;
