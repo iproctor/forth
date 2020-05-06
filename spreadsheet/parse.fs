@@ -106,7 +106,7 @@ s" ss:" constant \func-prefix constant func-prefix
 : cell-parse ( c-addr -- ) dup cell->str
   2dup blank-str? IF 2drop type:string ELSE
   2dup >float IF 2drop dup cell->val f!  type:num ELSE
-  over c@ [CHAR] = = IF parse-code over cell->val !  cell-dependency-buffer over cell->deps !  clear-deps  type:code ELSE
+  over c@ [CHAR] = = IF parse-code over cell->code !  cell-dependency-buffer over cell->deps !  clear-deps  type:code ELSE
   2drop type:string
   THEN THEN THEN
   swap cell->type c! ;

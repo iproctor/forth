@@ -80,6 +80,6 @@ test-cell cell->val f@ 1.2e f= ok
 s" = 1.2 2*" test-cell str>cell
 test-cell cell-parse
 test-cell cell->type c@ type:code =ok
-test-cell cell->val @ execute const->value@ 2.4e f= ok
+test-cell cell->code @ execute const->value@ 2.4e f= ok
 
 bye
