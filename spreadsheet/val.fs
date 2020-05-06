@@ -1,17 +1,12 @@
-require sheet.fs
 require ../ds/list.fs
+require mem.fs
+require sheet.fs
 
 0 constant val:const
 1 constant val:slice
 2 constant val:matrix
 
 : val->type ;
-
-0 VALUE val-mem-list
-: set-val-mem-list ['] val-mem-list >body ! ;
-: free-val-mem val-mem-list free-mem-list  0 set-val-mem-list ;
-: alloc-val ( u -- c-addr ) val-mem-list alloc-push  set-val-mem-list ;
-
 
 : const->value val->type cell+ ;
 : const->value@ const->value f@ ;

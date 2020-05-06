@@ -1,7 +1,7 @@
 require ../../test/test.fs
 require ../val.fs
 
-10 plan
+7 plan
 
 2 3 new-matrix constant testm
 testm matrix->dim 2@ 3 =ok 2 =ok

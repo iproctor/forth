@@ -2,7 +2,7 @@ require ../combis.fs
 require ../utils.fs
 require ../ds/list.fs
 require val.fs
-require sheet.fs
+require cell.fs
 
 0 VALUE cell-dependency-buffer
 : set-dep-buffer ['] cell-dependency-buffer >body ! ;
@@ -68,13 +68,13 @@ require sheet.fs
 
 : parse-slice ( c-addr u -- c-addr u ) parse-slice-indices POSTPONE new-slice-val  ;
 
-: grid->var ( u u -- ? ) 2dup new-slice-val ;
+: new-var ( u u -- ? ) 2dup new-slice-val ;
 
 : parse-var-indices ( c-addr u -- c-addr u )
   [CHAR] { pchr  parse-coordinate  [CHAR] } pchr
   2>r push-dep 2r> ;
 
-: parse-var ( c-addr u -- c-addr u ) parse-var-indices POSTPONE grid->var ;
+: parse-var ( c-addr u -- c-addr u ) parse-var-indices POSTPONE new-var ;
 
 s" ss:" constant \func-prefix constant func-prefix
 : apply-func-prefix-here ( -- c-addr ) func-prefix \func-prefix here-append ;
