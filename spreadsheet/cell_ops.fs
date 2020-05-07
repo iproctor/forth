@@ -2,6 +2,7 @@ require parse.fs
 require sheet.fs
 require mem.fs
 require ../ds/list.fs
+require ../utils.fs
 
 : for-dep-list[ ]] for-list[ list->val 2@  grid->cell [[ ; immediate
 : ]for-dep-list ]] ]for-list [[ ; immediate
@@ -14,8 +15,9 @@ defer cell-update
 :noname ( cell -- ) v. cell-run-code cell-backdeps-update ; IS cell-update
 
 : rem-cell-from-dep-list ( u u list -- ) for-dep-list[ v 2dup rem-cell-backdep ]for-dep-list 2drop ;
-: rem-cell-from-deps ( u u -- ) 2dup grid->cell cell->deps @ v. rem-cell-from-dep-list free-list ;
+: rem-cell-from-deps ( u u cell -- )  cell->deps @ rem-cell-from-dep-list ;
+: free-cell-deps ( cell -- ) cell->deps dup @ free-list 0 swap ! ;
 
-: cell-add-backdeps ( u u -- ) 2dup grid->cell cell->deps @ for-dep-list[ v 2dup push-cell-backdep ]for-dep-list 2drop ;
+: cell-add-backdeps ( u u cell -- ) cell->deps @ for-dep-list[ v 2dup push-cell-backdep ]for-dep-list 2drop ;
 
-: cell-done-edit ( u u -- ) 2dup rem-cell-from-deps  2dup grid->cell cell-parse  2dup cell-add-backdeps  grid->cell cell-update ;
+: cell-done-edit ( u u -- ) 2dup grid->cell  3dup rem-cell-from-deps  dup free-cell-deps  dup cell-parse  v. cell-add-backdeps  cell-update ;
