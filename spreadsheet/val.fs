@@ -16,7 +16,7 @@ require sheet.fs
 
 : slice->from val->type cell+ ;
 : slice->to slice->from 2 cells + ;
-: new-slice-val ( u u u u -- val ) 5 cells alloc-val  dup val:slice val->type !  dup slice->to 2!  dup slice->from 2! ;
+: new-slice-val ( u u u u -- val ) 5 cells alloc-val >r  val:slice r@ val->type !  r@ slice->to 2!  r@ slice->from 2! r> ;
 : slice-start-col ( slice -- u ) slice->from @ ;
 : slice-end-col ( slice -- u ) slice->to @ 1+ ;
 
