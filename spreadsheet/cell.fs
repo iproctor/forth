@@ -1,5 +1,6 @@
 \ Cell structure definition and helpers
 require ../ds/list.fs
+require err.fs
 
 256 constant \cell
 : *cell \cell * ;
@@ -7,6 +8,8 @@ require ../ds/list.fs
 0 constant type:string
 1 constant type:num
 2 constant type:code
+
+
 
 : cell->val ( c-addr -- c-addr ) ;
 : cell->code ( c-addr -- c-addr ) cell->val cell+ ;
@@ -33,3 +36,4 @@ require ../ds/list.fs
 : cell-ins ( c u c-addr -- ) dup 1+cell  2dup shift-cell  cell->data + c! ;
 
 : cell-is-code? ( cell -- flag ) cell->type@ type:code = ;
+: cell-val-or-throw ( cell -- r ) dup cell->type@ type:string = IF drop err:nonval throw THEN cell->val f@ ;

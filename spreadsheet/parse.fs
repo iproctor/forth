@@ -3,6 +3,7 @@ require ../utils.fs
 require ../ds/list.fs
 require val.fs
 require cell.fs
+require err.fs
 
 0 VALUE cell-dependency-buffer
 : set-dep-buffer ['] cell-dependency-buffer >body ! ;
@@ -31,10 +32,6 @@ require cell.fs
   >float 0= throw
   POSTPONE fliteral POSTPONE new-const-val
   2r> ;
-
-1 constant err:syntax
-2 constant err:eol
-3 constant err:undef
 
 : pchr ( c-addr u c -- c-addr u )
   over 0= IF drop err:eol throw THEN

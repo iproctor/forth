@@ -1,12 +1,11 @@
 require ../ds/list.fs
 require mem.fs
 require sheet.fs
+require err.fs
 
 0 constant val:const
 1 constant val:slice
 2 constant val:matrix
-
-4 constant err:nonscalar
 
 : val->type ;
 
@@ -30,7 +29,7 @@ require sheet.fs
 
 : slice-for-each ( ... xt slice -- ... ) dup slice-col-range U+DO
     slice-row-range U+DO
-      i j grid->cell cell->val f@ v. execute
+      i j grid->cell cell-val-or-throw v. execute
     LOOP LOOP ;
 
 : matrix->dim val->type cell+ ;
