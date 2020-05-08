@@ -12,6 +12,7 @@ require err.fs
 
 
 : cell->val ( c-addr -- c-addr ) ;
+: cell->val@ ( c-addr -- c-addr ) cell->val f@ ;
 : cell->code ( c-addr -- c-addr ) cell->val cell+ ;
 : cell->deps ( c-addr -- c-addr ) cell->code cell+ ;
 : cell->backdeps ( c-addr -- c-addr ) cell->deps cell+ ;
@@ -36,4 +37,6 @@ require err.fs
 : cell-ins ( c u c-addr -- ) dup 1+cell  2dup shift-cell  cell->data + c! ;
 
 : cell-is-code? ( cell -- flag ) cell->type@ type:code = ;
+: cell-is-string? ( cell -- flag) cell->type@ type:string = ;
+
 : cell-val-or-throw ( cell -- r ) dup cell->type@ type:string = IF drop err:nonval throw THEN cell->val f@ ;
