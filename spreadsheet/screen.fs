@@ -3,10 +3,22 @@ require sheet.fs
 
 0 value port-col
 0 value port-row
+0 value cursor-col
+0 value cursor-row
+
+: port-width ( -- u ) form nip ;
+: port-height ( -- u ) form drop 1- ;
+: bound-port ( -- ) port-col bound-coord to port-col  port-row bound-coord to port-row ;
+: inc-port-row ( u -- ) port-row + TO port-row  bound-port ;
+: inc-port-col ( u -- ) port-col + TO port-col  bound-port ;
+
+: cursor-up ( -- ) cursor-row dup IF 1- TO cursor-row ELSE drop -1 inc-port-row THEN ;
+: cursor-down ( -- ) cursor-row 1+ dup port-height < IF TO cursor-row ELSE drop 1 inc-port-row THEN ;
+: cursor-left ( -- ) cursor-col dup IF 1- TO cursor-col ELSE drop -1 inc-port-col THEN ;
+: cursor-right ( -- ) cursor-col 1+ dup port-width < IF TO cursor-col ELSE drop 1 inc-port-col THEN ;
 
 24 constant cell-width
 
-: port-width ( -- u ) form nip ;
 : term-esc 27 emit ;
 : end-fmt ( -- ) term-esc ." [0m" ;
 : /up ( n n -- n ) /mod swap IF 1+ THEN ;
@@ -22,14 +34,26 @@ require sheet.fs
 : header-fmt ( -- ) term-esc ." [7;1m" ;
 : header ( -- ) header-fmt  0 at-row  ['] col-header for-row  end-fmt ;
 
-: row-fmt ( u -- ) term-esc  1 and IF ." [48;5;235m" ELSE ." [0m" THEN ;
+: active-cell ( u u -- flag ) port-row - cursor-row =  swap port-col - cursor-col = and ;
+: cell-fmt ( u u -- ) term-esc  2dup active-cell IF 2drop ." [48;5;238m" ELSE
+    nip 1 and IF ." [48;5;235m" ELSE ." [0m" THEN THEN ;
 : row-pos ( u -- u ) port-row - 1+  at-row ;
 : render-string ( c-addr u u -- ) 2dup swap - >r  min type  r> spaces ;
 : render-num ( r u -- ) dup 2 - 0 f.rdp ;
-: render-cell ( u u u -- ) swap  v grid->cell  over 0= IF spaces drop ELSE
+: render-cell ( u u u -- ) swap  >r swap 2dup cell-fmt grid->cell r> over 0= IF spaces drop ELSE
     >r dup cell-is-string? IF cell->str r> render-string ELSE
     cell->val@ r> render-num THEN THEN ;
 : render-cell-iter ( u u u -- u ) 2>r dup 2r> render-cell ;
-: row ( u -- ) dup row-fmt  dup row-pos  ['] render-cell-iter for-row  end-fmt ;
+: row ( u -- ) dup row-pos  ['] render-cell-iter for-row  drop end-fmt ;
 
-: render page header form drop 1- 0 U+DO i row LOOP ;
+: render header port-height 0 U+DO port-row i + row LOOP ;
+
+: handle-input ( -- ) BEGIN key CASE
+    [CHAR] q OF exit ENDOF
+    [CHAR] k OF cursor-up ENDOF
+    [CHAR] j OF cursor-down ENDOF
+    [CHAR] h OF cursor-left ENDOF
+    [CHAR] l OF cursor-right ENDOF
+  ENDCASE render AGAIN ;
+
+: screen page render handle-input ;
