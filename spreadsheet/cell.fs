@@ -22,6 +22,7 @@ require err.fs
 : cell->data ( c-addr -- c-addr ) cell->sz char+ ;
 : cell->str ( c-addr -- c-addr u ) v. cell->data  cell->sz c@ ;
 : bound-cell \cell 1- min 0 max ;
+\cell 0 cell->data - constant \cell-str
 
 : push-cell-backdep ( u u c-addr -- ) cell->backdeps dup >r @  list-prepend2 r> ! ;
 : rem-cell-backdep ( u u c-addr -- ) cell->backdeps dup >r @  list-filter-out2 >r ! ;
@@ -40,3 +41,4 @@ require err.fs
 : cell-is-string? ( cell -- flag) cell->type@ type:string = ;
 
 : cell-val-or-throw ( cell -- r ) dup cell->type@ type:string = IF drop err:nonval throw THEN cell->val f@ ;
+

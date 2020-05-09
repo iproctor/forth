@@ -21,3 +21,7 @@ defer cell-update
 : cell-add-backdeps ( u u cell -- ) cell->deps @ for-dep-list[ v 2dup push-cell-backdep ]for-dep-list 2drop ;
 
 : cell-done-edit ( u u -- ) 2dup grid->cell  3dup rem-cell-from-deps  dup free-cell-deps  dup cell-parse  v. cell-add-backdeps  cell-update ;
+
+: edit-cell-str ( cell -- ) dup cell->str \cell-str swap edit-line swap cell->sz c! ;
+
+: edit-cell ( u u -- ) 2dup grid->cell! edit-cell-str  cell-done-edit ;

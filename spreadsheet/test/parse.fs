@@ -30,17 +30,17 @@ s" " ' parse-col catch err:syntax =ok 2drop
 s" 1" ' parse-col catch err:syntax =ok 2drop
 
 ." # parse-row" cr
-s" 12" parse-row 11 =ok str-empty
+s" 12" parse-row 12 =ok str-empty
 s" A12" ' parse-row catch err:syntax =ok 2drop
 s" " ' parse-row catch err:syntax =ok 2drop
 
 ." # parse-slice-indices" cr
 : tsi [ s" [A1:H33]" parse-slice-indices str-empty ] ;
-tsi 32 =ok 7 =ok 0 =ok 0 =ok
+tsi 33 =ok 7 =ok 1 =ok 0 =ok
 
 ." # parse-var-indices" cr
 : tvi [ s" {H33}" parse-var-indices str-empty ] ;
-tvi 32 =ok  7 =ok
+tvi 33 =ok  7 =ok
 
 ." # prefix-func" cr
 apply-func-prefix-here here \func-prefix + =ok

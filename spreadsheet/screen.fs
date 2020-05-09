@@ -1,5 +1,6 @@
 require ../combis.fs
 require sheet.fs
+require cell_ops.fs
 
 0 value port-col
 0 value port-row
@@ -35,7 +36,7 @@ require sheet.fs
 : right-spaces ( u u -- ) col-name-width -  2 /up  spaces ;
 : col-header ( u u -- ) 2dup left-spaces  dup col-name  right-spaces ;
 : header-fmt ( -- ) term-esc ." [7;1m" ;
-: scr-header ( -- ) header-fmt  ruler-width 0 at-xy  ['] col-header for-row  end-fmt ;
+: scr-header ( -- ) 0 0 at-xy  ruler-width spaces  header-fmt  ['] col-header for-row  end-fmt ;
 
 : active-cell ( u u -- flag ) port-row - cursor-row =  swap port-col - cursor-col = and ;
 : cell-fmt ( u u -- ) term-esc  2dup active-cell IF 2drop ." [48;5;238m" ELSE
@@ -52,12 +53,15 @@ require sheet.fs
 
 : render scr-header port-height 0 U+DO port-row i + row LOOP ;
 
+: edit-cur-cell ( -- ) port-col cursor-col + port-row cursor-row + edit-cell ;
+
 : handle-input ( -- ) BEGIN key CASE
     [CHAR] q OF exit ENDOF
     [CHAR] k OF cursor-up ENDOF
     [CHAR] j OF cursor-down ENDOF
     [CHAR] h OF cursor-left ENDOF
     [CHAR] l OF cursor-right ENDOF
+    [CHAR] e OF edit-cur-cell ENDOF
   ENDCASE render AGAIN ;
 
 : screen page render handle-input ;
