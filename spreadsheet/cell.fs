@@ -25,7 +25,7 @@ require err.fs
 \cell 0 cell->data - constant \cell-str
 
 : push-cell-backdep ( u u c-addr -- ) cell->backdeps dup >r @  list-prepend2 r> ! ;
-: rem-cell-backdep ( u u c-addr -- ) cell->backdeps dup >r @  list-filter-out2 >r ! ;
+: rem-cell-backdep ( u u c-addr -- ) cell->backdeps dup >r @  list-filter-out2 r> ! ;
 
 : 1+cell ( c-addr -- ) dup cell->sz c@ 1+ bound-cell swap c! ;
 : 1-cell ( c-addr -- ) dup cell->sz c@ 1- bound-cell swap c! ;

@@ -37,7 +37,7 @@ require ../utils.fs
 : list-filter2 [ ' 2@ [list-filter] ] ;
 
 : 2<> ( w w w w -- w w flag ) >r >r 2dup r> r> v swap = v = and 0= ;
-: list-filter-out2 ( w w list -- list ) ['] 2<> swap list-filter2 ;
+: list-filter-out2 ( w w list -- list ) ['] 2<> swap list-filter2  v 2drop ;
 
 : alloc-push ( u list -- c-addr list ) swap allocate throw dup rot list-prepend ;
 : free-mem-list ( list -- ) dup for-list[ list->val @ free throw ]for-list free-list ;

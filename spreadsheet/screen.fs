@@ -38,7 +38,8 @@ require cell_ops.fs
 : header-fmt ( -- ) term-esc ." [7;1m" ;
 : scr-header ( -- ) 0 0 at-xy  ruler-width spaces  header-fmt  ['] col-header for-row  end-fmt ;
 
-: active-cell ( u u -- flag ) port-row - cursor-row =  swap port-col - cursor-col = and ;
+: cursor-cell-coords ( -- u u ) port-col cursor-col + port-row cursor-row + ;
+: active-cell ( u u -- flag ) cursor-cell-coords d= ;
 : cell-fmt ( u u -- ) term-esc  2dup active-cell IF 2drop ." [48;5;238m" ELSE
     nip 1 and IF ." [48;5;235m" ELSE ." [0m" THEN THEN ;
 : row-pos ( u -- u ) port-row - 1+  at-row ;
@@ -53,7 +54,7 @@ require cell_ops.fs
 
 : render scr-header port-height 0 U+DO port-row i + row LOOP ;
 
-: edit-cur-cell ( -- ) port-col cursor-col + port-row cursor-row + edit-cell ;
+: edit-cur-cell ( -- ) cursor-cell-coords edit-cell ;
 
 : handle-input ( -- ) BEGIN key CASE
     [CHAR] q OF exit ENDOF
