@@ -11,3 +11,5 @@ require combis.fs
 : here-append ( c-addr u -- c-addr ) here swap v. cmove  here swap chars + ;
 
 : 3dup 2 pick 2 pick 2 pick ;
+
+: .n ( n -- ) 0 <<# #s #> type #>> ;

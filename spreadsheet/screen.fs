@@ -1,4 +1,5 @@
 require ../combis.fs
+require ../utils.fs
 require sheet.fs
 require cell_ops.fs
 
@@ -6,6 +7,18 @@ require cell_ops.fs
 0 value port-row
 0 value cursor-col
 0 value cursor-row
+: cursor-cell-col ( -- u ) port-col cursor-col + ;
+: cursor-cell-row ( -- u ) port-row cursor-row + ;
+: cursor-cell-coords ( -- u u ) cursor-cell-col cursor-cell-row ;
+
+0 value selecting
+0 value select-col
+0 value select-row
+: start-selecting ( -- ) true TO selecting  cursor-cell-coords TO select-row TO select-col ;
+: toggle-selecting ( -- ) selecting IF false TO selecting ELSE start-selecting THEN ;
+: between-coords? ( u u u -- flag ) 2dup max v min within-range? ;
+: in-selection? ( u u -- flag ) selecting 0= IF 2drop false exit THEN
+  cursor-cell-row select-row between-coords?  swap cursor-cell-col select-col between-coords? and ;
 
 4 constant ruler-width
 24 constant cell-width
@@ -38,10 +51,13 @@ require cell_ops.fs
 : header-fmt ( -- ) term-esc ." [7;1m" ;
 : scr-header ( -- ) 0 0 at-xy  ruler-width spaces  header-fmt  ['] col-header for-row  end-fmt ;
 
-: cursor-cell-coords ( -- u u ) port-col cursor-col + port-row cursor-row + ;
-: active-cell ( u u -- flag ) cursor-cell-coords d= ;
-: cell-fmt ( u u -- ) term-esc  2dup active-cell IF 2drop ." [48;5;238m" ELSE
-    nip 1 and IF ." [48;5;235m" ELSE ." [0m" THEN THEN ;
+: active-cell? ( u u -- flag ) cursor-cell-coords d= ;
+: base-shade ( u -- u ) 1 and IF 2 ELSE 0 THEN ;
+: cell-shade ( u u -- ) dup base-shade >r
+  2dup active-cell? IF 2drop rdrop 8 ELSE
+  2dup in-selection? IF 2drop r> 4 + ELSE 2drop r> THEN THEN
+  dup 0= IF drop ." [0m"  ELSE ." [48;5;" 231 + .n ." m" THEN ;
+: cell-fmt ( u u -- ) term-esc cell-shade ;
 : row-pos ( u -- u ) port-row - 1+  at-row ;
 : render-string ( c-addr u u -- ) 2dup swap - >r  min type  r> spaces ;
 : render-num ( r u -- ) dup 2 - 0 f.rdp ;
@@ -63,6 +79,7 @@ require cell_ops.fs
     [CHAR] h OF cursor-left ENDOF
     [CHAR] l OF cursor-right ENDOF
     [CHAR] e OF edit-cur-cell ENDOF
+    [CHAR] v OF toggle-selecting ENDOF
   ENDCASE render AGAIN ;
 
 : screen page render handle-input ;
