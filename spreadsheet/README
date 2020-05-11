@@ -1,0 +1,28 @@
+To run:
+brew install gforth
+gforth main.fs
+
+Commands:
+h - right
+l - left
+j - down
+k - up
+e - edit cell
+v - start selecting
+y - copy selection
+p - paste
+q - quit
+
+Cell syntax:
+={WORD} ...
+where a WORD is a numerical constant, variable, or slice.
+Variables look like {A0} and refer to a single cell
+Slices look like [A0:B1] and refer to a range of cells
+
+The function library is:
+sum
+mean
+
+For example,
+=[A0:B1] mean
+will compute the mean of the A0:B1 range.
