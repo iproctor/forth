@@ -2,6 +2,7 @@ require ../combis.fs
 require ../utils.fs
 require sheet.fs
 require cell_ops.fs
+require clipboard.fs
 
 0 value port-col
 0 value port-row
@@ -19,6 +20,7 @@ require cell_ops.fs
 : between-coords? ( u u u -- flag ) 2dup max v min within-range? ;
 : in-selection? ( u u -- flag ) selecting 0= IF 2drop false exit THEN
   cursor-cell-row select-row between-coords?  swap cursor-cell-col select-col between-coords? and ;
+: selection-range ( -- u u u u ) cursor-cell-col select-col min  cursor-cell-row select-row min  cursor-cell-col select-col max cursor-cell-row select-row max ;
 
 4 constant ruler-width
 24 constant cell-width
@@ -56,7 +58,7 @@ require cell_ops.fs
 : cell-shade ( u u -- ) dup base-shade >r
   2dup active-cell? IF 2drop rdrop 8 ELSE
   2dup in-selection? IF 2drop r> 4 + ELSE 2drop r> THEN THEN
-  dup 0= IF drop ." [0m"  ELSE ." [48;5;" 231 + .n ." m" THEN ;
+  dup 0= IF drop ." [0m"  ELSE ." [48;5;" 231 + print-u ." m" THEN ;
 : cell-fmt ( u u -- ) term-esc cell-shade ;
 : row-pos ( u -- u ) port-row - 1+  at-row ;
 : render-string ( c-addr u u -- ) 2dup swap - >r  min type  r> spaces ;
@@ -72,6 +74,10 @@ require cell_ops.fs
 
 : edit-cur-cell ( -- ) cursor-cell-coords edit-cell ;
 
+: yank ( -- ) selecting 0= IF exit THEN selection-range copy  toggle-selecting ;
+: paste-at ( -- ) cursor-cell-coords paste ;
+
+
 : handle-input ( -- ) BEGIN key CASE
     [CHAR] q OF exit ENDOF
     [CHAR] k OF cursor-up ENDOF
@@ -80,6 +86,8 @@ require cell_ops.fs
     [CHAR] l OF cursor-right ENDOF
     [CHAR] e OF edit-cur-cell ENDOF
     [CHAR] v OF toggle-selecting ENDOF
+    [CHAR] y OF yank ENDOF
+    [CHAR] p OF paste-at ENDOF
   ENDCASE render AGAIN ;
 
 : screen page render handle-input ;

@@ -40,5 +40,5 @@ require err.fs
 : cell-is-code? ( cell -- flag ) cell->type@ type:code = ;
 : cell-is-string? ( cell -- flag) cell->type@ type:string = ;
 
-: cell-val-or-throw ( cell -- r ) dup cell->type@ type:string = IF drop err:nonval throw THEN cell->val f@ ;
+: cell-val-or-throw ( cell -- r ) dup cell->type@ type:string = IF drop err:nonval throw THEN cell->val@ ;
 

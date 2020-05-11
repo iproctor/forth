@@ -16,11 +16,11 @@ require err.fs
 : slice->from val->type cell+ ;
 : slice->to slice->from 2 cells + ;
 : new-slice-val ( u u u u -- val ) 5 cells alloc-val >r  val:slice r@ val->type !  r@ slice->to 2!  r@ slice->from 2! r> ;
-: slice-start-col ( slice -- u ) slice->from @ ;
-: slice-end-col ( slice -- u ) slice->to @ 1+ ;
+: slice-start-row ( slice -- u ) slice->from @ ;
+: slice-end-row ( slice -- u ) slice->to @ 1+ ;
 
-: slice-start-row ( slice -- u ) slice->from cell+ @ ;
-: slice-end-row ( slice -- u ) slice->to cell+ @ 1+ ;
+: slice-start-col ( slice -- u ) slice->from cell+ @ ;
+: slice-end-col ( slice -- u ) slice->to cell+ @ 1+ ;
 
 : slice-size ( slice -- u ) dup v. slice-end-col slice-start-col -  swap v. slice-end-row slice-start-row -  * ;
 
@@ -28,22 +28,22 @@ require err.fs
 : slice-row-range ( slice -- u u ) v. slice-end-row slice-start-row ;
 
 : slice-for-each ( ... xt slice -- ... ) dup slice-col-range U+DO
-    slice-row-range U+DO
-      i j grid->cell cell-val-or-throw v. execute
-    LOOP LOOP ;
+    dup slice-row-range U+DO
+      j i grid->cell cell-val-or-throw >r v. execute r>
+    LOOP LOOP 2drop ;
 
 : matrix->dim val->type cell+ ;
 : matrix->cols matrix->dim cell+ @ ;
 : matrix->data matrix->dim 2 cells + ;
 : matrix[] ( u u matrix -- r ) { cols rows matrix } matrix matrix->cols rows *  cols +  cells  matrix matrix->data + f@ ;
-: matrix-col-range ( matrix -- u u ) matrix->dim @ 0 ;
-: matrix-row-range ( matrix -- u u ) matrix->dim cell+ @ 0 ;
+: matrix-col-range ( matrix -- u u ) matrix->cols 0 ;
+: matrix-row-range ( matrix -- u u ) matrix->dim @ 0 ;
 : new-matrix ( u u -- val ) 2dup * 3 + cells alloc-val  val:matrix over val->type !  dup >r matrix->dim 2! r> ;
 
 : matrix-for-each ( ... xt matrix -- ... ) dup matrix-col-range U+DO
     dup matrix-row-range U+DO
-      dup i j rot matrix[] >r v. execute r>
-    LOOP LOOP ;
+      dup j i rot matrix[] >r v. execute r>
+    LOOP LOOP 2drop ;
 
 : val-for-each ( ... xt val -- ... ) dup val->type @ CASE
     val:const OF const->value@ swap execute ENDOF

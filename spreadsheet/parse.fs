@@ -2,6 +2,7 @@ require ../combis.fs
 require ../utils.fs
 require ../ds/list.fs
 require val.fs
+require funcs.fs
 require cell.fs
 require err.fs
 
@@ -55,7 +56,7 @@ require err.fs
 : parse-row ( c-addr u -- u ) dup >r  0. 2swap >number
   dup r> = IF err:syntax throw THEN  2swap 0<> IF err:syntax throw THEN ;
 
-: push-slice-deps ( u u u u -- ) { c1 r1 c2 r2 } c2 1+ c1 U+DO r2 1+ r1 U+DO i j push-dep LOOP LOOP ;
+: push-slice-deps ( u u u u -- ) { c1 r1 c2 r2 } c2 1+ c1 U+DO r2 1+ r1 U+DO j i push-dep LOOP LOOP ;
 
 : save-index ( c-addr u u -- u c-addr u ) dup POSTPONE literal -rot ;
 : parse-coordinate ( c-addr u -- u u c-addr u) parse-col save-index  parse-row save-index ;

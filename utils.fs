@@ -12,4 +12,4 @@ require combis.fs
 
 : 3dup 2 pick 2 pick 2 pick ;
 
-: .n ( n -- ) 0 <<# #s #> type #>> ;
+: print-u ( n -- ) 0 <<# #s #> type #>> ;

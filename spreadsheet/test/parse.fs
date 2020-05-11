@@ -3,7 +3,7 @@
 require ../../test/test.fs
 require ../parse.fs
 
-39 plan
+40 plan
 
 : str-empty s" " str= ok ;
 
@@ -82,4 +82,7 @@ test-cell cell-parse
 test-cell cell->type c@ type:code =ok
 test-cell cell->code @ execute const->value@ 2.4e f= ok
 
+s" =[A0:A1] sum" test-cell str>cell
+test-cell cell-parse
+test-cell cell->type c@ type:code =ok
 bye
