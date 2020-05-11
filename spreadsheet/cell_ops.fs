@@ -8,7 +8,7 @@ require ../utils.fs
 : ]for-dep-list ]] ]for-list [[ ; immediate
 
 : cell-exec-code ( cell -- r ) cell->code @ execute  val->scalar free-val-mem  ;
-: cell-run-code ( cell -- ) dup cell-is-code? IF dup cell-exec-code  dup cell->val f! ELSE drop THEN ;
+: cell-run-code ( cell -- ) dup cell-is-code? IF dup cell-exec-code  cell->val f! ELSE drop THEN ;
 
 defer cell-update
 : cell-backdeps-update ( cell -- ) cell->backdeps @  for-dep-list[ cell-update ]for-dep-list ;

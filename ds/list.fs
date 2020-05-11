@@ -31,7 +31,6 @@ require ../utils.fs
     r@2 list->next @ list->val [[ at compile, ]] r@ execute IF
       r@2 list->next @ ELSE r@2 dup list-rm-next THEN
     r> rdrop swap
-    exit
   AGAIN THEN THEN nip [[ ;
 : list-filter [ ' @ [list-filter] ] ;
 : list-filter2 [ ' 2@ [list-filter] ] ;
