@@ -1,22 +1,29 @@
 require ../combis.fs
 
 \ 48khz, 16 bit samples, 2 channels, 100ms
-2 2 * constant \frame
-48000 constant sample-rate
-sample-rate 10 / constant frame-count
-sample-rate \frame * constant \ring
-create ring \ring allot
+2 value channels
+48000 value sample-rate
+2 value sample-bytes
+100 value buf-dur-ms
+
+: \frame channels sample-bytes * ;
+: frame-count sample-rate buf-dur-ms * 1000 / ;
+: \ring sample-rate \frame * ;
+
+0 value ring
+: init-ring here to ring  \ring allot ;
+
 \ Pointers are to frames
 0 value read-ptr
 0 value write-ptr
 : frames ( u -- u ) \frame * ;
 : left-channel ( c-addr -- c-addr ) ;
-: right-channel ( c-addr -- c-addr ) 2 + ;
+: right-channel ( c-addr -- c-addr ) sample-bytes + ;
 : w+! ( n c-addr -- ) tuck sw@ + swap w! ;
 : add-left ( n c-addr -- ) left-channel w+! ;
 : add-right ( n c-addr -- ) right-channel w+! ;
 \ Writes
-: ring-capacity ( -- u ) read-ptr write-ptr < IF \ring write-ptr read-ptr - - ELSE read-ptr write-ptr - THEN \frame / ;
+: ring-capacity ( -- u ) read-ptr write-ptr <= IF frame-count write-ptr read-ptr - - ELSE read-ptr write-ptr - THEN ;
 : frame-write-offset-index ( u -- u ) write-ptr + frame-count mod ;
 : frame-at-write-offset ( u -- c-addr ) frame-write-offset-index frames ring + ;
 
