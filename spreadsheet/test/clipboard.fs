@@ -1,7 +1,11 @@
+#! /usr/local/bin/gforth
+
 require ../../test/test.fs
 require ../clipboard.fs
 
 : str-empty s" " str= ok ;
+
+11 plan
 
 1 2 3 6 coords-to-dims 3 5 d= ok
 

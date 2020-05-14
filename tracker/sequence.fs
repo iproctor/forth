@@ -31,7 +31,7 @@ require ../combis.fs
 : <-> ( -- ) 2 cells allocate throw  dup trigger:rest default-dur init-trig  append-to-seq ;
 : new-note ( u u -- ) 4 cells allocate throw  dup trigger:note default-dur init-trig  v. trigger-notes2! append-to-seq ;
 
-: def-notes [CHAR] h [CHAR] a U+DO octaves 0 U+DO <<# i 0 #s j hold #> nextname : j [CHAR] a - POSTPONE literal i POSTPONE literal POSTPONE new-note POSTPONE ;  #>> LOOP LOOP ;
+: def-notes [CHAR] h [CHAR] a U+DO octaves 0 U+DO <<# [CHAR] > hold i 0 #s j hold [CHAR] < hold #> nextname : j [CHAR] a - POSTPONE literal i POSTPONE literal POSTPONE new-note POSTPONE ;  #>> LOOP LOOP ;
 def-notes
 
 

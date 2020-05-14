@@ -1,3 +1,5 @@
+#! /usr/local/bin/gforth
+
 require ../../test/test.fs
 require ../val.fs
 require ../cell_ops.fs

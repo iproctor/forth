@@ -5,11 +5,12 @@ require ../utils.fs
 : list->val ( list -- c-addr ) cell+ ;
 : list-prepend ( w list -- list ) 2 cells allocate throw dup >r list->next !  r@ list->val !  r> ;
 : list-prepend2 ( w w list -- list ) 3 cells allocate throw dup >r list->next !  r@ list->val 2! r> ;
+: list-append ( w list -- list ) 2 cells allocate throw  dup 2 cells erase  dup >r swap list->next !  r@ list->val ! r> ;
 : for-list[ ]] BEGIN >r r@ WHILE r@ [[ ; immediate
-: ]for-list ]] r> list-next @ REPEAT rdrop [[ ; immediate
+: ]for-list ]] r> list->next @ REPEAT rdrop [[ ; immediate
 : show-list ( list -- ) for-list[ ." ( " list->val @ . ." )" ]for-list ;
 : show-list2 ( list -- ) for-list[ ." ( " list->val 2@ swap . . ." )" ]for-list ;
-: free-list ( list -- ) BEGIN dup WHILE v. list-next free throw @ REPEAT drop ;
+: list-free ( list -- ) BEGIN dup WHILE v. list->next free throw @ REPEAT drop ;
 
 : list-consume-while[ ]] BEGIN
     >r r@ WHILE
@@ -24,14 +25,14 @@ require ../utils.fs
 : list-drop-until2 ( ... xt list -- list ) [ ' 2@ [list-drop-until] ] ;
 
 : list-rm-next ( list -- ) list->next dup  @ v. list->next free throw   @ swap ! ;
-: [list-filter] { at } ( ... xt list -- ... list ) ]] over >r [[ at [list-drop-until] ]] r> swap BEGIN
+: [list-filter] { at } ( ... xt list -- ... list ) ]] over >r [[ at [list-drop-until] ]] r> swap dup >r BEGIN
     dup WHILE
     dup list->next @ WHILE
     >r >r
     r@2 list->next @ list->val [[ at compile, ]] r@ execute IF
       r@2 list->next @ ELSE r@2 dup list-rm-next THEN
     r> rdrop swap
-  AGAIN THEN THEN nip [[ ;
+  AGAIN THEN THEN 2drop r> [[ ;
 : list-filter [ ' @ [list-filter] ] ;
 : list-filter2 [ ' 2@ [list-filter] ] ;
 
@@ -39,4 +40,12 @@ require ../utils.fs
 : list-filter-out2 ( w w list -- list ) ['] 2<> swap list-filter2  v 2drop ;
 
 : alloc-push ( u list -- c-addr list ) swap allocate throw dup rot list-prepend ;
-: free-mem-list ( list -- ) dup for-list[ list->val @ free throw ]for-list free-list ;
+: free-mem-list ( list -- ) dup for-list[ list->val @ free throw ]for-list list-free ;
+
+: new-list-anchor ( -- list-anchor ) 2 cells allocate throw  dup 2 cells erase ;
+: list-anchor->list ;
+: list-anchor->list@  list-anchor->list @ ;
+: list-anchor->end cell+ ;
+: list-anchor-prepend ( w list-anchor -- ) dup >r list-anchor->list @ list-prepend  r@ list-anchor->list !  r> dup list-anchor->end @ 0= IF dup list-anchor->list @ swap list-anchor->end ! THEN ;
+: list-anchor-append ( w list-anchor -- ) dup list-anchor->end @ dup 0= IF drop list-anchor-prepend exit THEN
+  rot swap list-append  swap list-anchor->end ! ;
