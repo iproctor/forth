@@ -24,6 +24,7 @@ require ../combis.fs
 : add-right ( n c-addr -- ) right-channel w+! ;
 \ Writes
 : ring-capacity ( -- u ) read-ptr write-ptr <= IF frame-count write-ptr read-ptr - - ELSE read-ptr write-ptr - THEN ;
+: ring-capacity-ms ( -- u ) ring-capacity 1000 * sample-rate / ;
 : frame-write-offset-index ( u -- u ) write-ptr + frame-count mod ;
 : frame-at-write-offset ( u -- c-addr ) frame-write-offset-index frames ring + ;
 

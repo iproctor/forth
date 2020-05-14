@@ -1,11 +1,12 @@
 require ../../test/test.fs
 require ../ring.fs
 
-15 plan
+16 plan
 
 init-ring
 
 ring-capacity frame-count =ok
+ring-capacity-ms buf-dur-ms =ok
 1 2 0 ring-frame+!
 1 2 0 ring-frame+!
 1 ring-adv-write
