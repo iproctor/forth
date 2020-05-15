@@ -49,3 +49,7 @@ require ../utils.fs
 : list-anchor-prepend ( w list-anchor -- ) dup >r list-anchor->list @ list-prepend  r@ list-anchor->list !  r> dup list-anchor->end @ 0= IF dup list-anchor->list @ swap list-anchor->end ! THEN ;
 : list-anchor-append ( w list-anchor -- ) dup list-anchor->end @ dup 0= IF drop list-anchor-prepend exit THEN
   rot swap list-append  swap list-anchor->end ! ;
+: list-anchor-to-list ( list-anchor -- list ) v. list-anchor->list@ free throw ;
+
+: list-n ( list -- u ) 0 swap for-list[ drop 1+ ]for-list ;
+: list-to-arr ( list -- w-addr u ) dup list-n cells allocate throw  0 rot for-list[ >r 2dup cells + r> list->val @ swap !  1+ ]for-list ;

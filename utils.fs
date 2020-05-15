@@ -13,3 +13,11 @@ require combis.fs
 : 3dup 2 pick 2 pick 2 pick ;
 
 : print-u ( n -- ) 0 <<# #s #> type #>> ;
+
+: 2!r ( w w c-addr -- ) v swap 2! ;
+: 2@r ( c-addr -- w w ) 2@ swap ;
+: 3!r ( w w w c-addr -- ) >r -rot r@ 2!r r> 2 cells + ! ;
+
+: 2elem@ ( w-addr u u -- w w ) >r over swap cells + @ swap r> cells + @ ;
+
+: dup3rd ( w w w -- w w w w ) 2>r dup 2r> ;

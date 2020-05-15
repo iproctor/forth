@@ -1,4 +1,5 @@
 require ../combis.fs
+require ../ds/list.fs
 
 8 constant octaves
 
@@ -8,20 +9,10 @@ require ../combis.fs
 
 0 value cur-seq
 
-: seq-trigs ( seq -- c-addr ) ;
-: seq-trigs@ ( seq -- c-addr ) seq-trigs @ ;
-: seq-trig-count ( seq -- c-addr ) seq-trigs cell+ ;
-: seq-trig-count@ ( seq -- c-addr ) seq-trig-count @ ;
-: seq-sz ( seq -- c-addr ) seq-trig-count cell+ ;
-: resize-seq-if-full ( -- ) cur-seq seq-sz @  cur-seq seq-trig-count@ = IF
-    cur-seq cur-seq seq-sz @ 2* dup >r resize throw  r> cur-seq seq-sz ! THEN ;
-: next-seq-slot ( -- c-addr ) cur-seq v. seq-trigs@ seq-trig-count@ cells + ;
-: inc-seq-trigs ( -- ) cur-seq seq-trigs 1 swap +! ;
+: append-to-seq ( trigger -- ) cur-seq list-anchor-append ;
 
-: append-to-seq ( trigger -- ) resize-seq-if-full  next-seq-slot !  inc-seq-trigs ;
-
-: <| ( -- ) 3 cells allocate throw to cur-seq  16 cells allocate throw cur-seq seq-trigs !  0 cur-seq seq-trig-count !  16 cur-seq seq-sz ! ;
-: |> ( -- seq ) cur-seq  0 to cur-seq ;
+: <| ( -- ) new-list-anchor to cur-seq ;
+: |> ( -- seq ) cur-seq list-anchor-to-list  0 to cur-seq ;
 
 : trigger-type ( trigger -- c-addr ) ;
 : trigger-dur ( trigger -- c-addr ) cell+ ;
