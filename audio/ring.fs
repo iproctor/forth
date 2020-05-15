@@ -10,18 +10,19 @@ require ../combis.fs
 : frame-count sample-rate buf-dur-ms * 1000 / ;
 : \ring sample-rate \frame * ;
 
-0 value ring
-: init-ring here to ring  \ring allot ;
-
+uvalue ring
 \ Pointers are to frames
-0 value read-ptr
-0 value write-ptr
+uvalue read-ptr
+uvalue write-ptr
+: init-ring here to ring  \ring allot  0 to read-ptr 0 to write-ptr ;
+
 : frames ( u -- u ) \frame * ;
 : left-channel ( c-addr -- c-addr ) ;
 : right-channel ( c-addr -- c-addr ) sample-bytes + ;
 : w+! ( n c-addr -- ) tuck sw@ + swap w! ;
 : add-left ( n c-addr -- ) left-channel w+! ;
 : add-right ( n c-addr -- ) right-channel w+! ;
+
 \ Writes
 : ring-capacity ( -- u ) read-ptr write-ptr <= IF frame-count write-ptr read-ptr - - ELSE read-ptr write-ptr - THEN ;
 : ring-capacity-ms ( -- u ) ring-capacity 1000 * sample-rate / ;
