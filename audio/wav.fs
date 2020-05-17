@@ -17,3 +17,15 @@ require ../utils.fs
 : get-data-chunk ( c-addr -- c-addr ) s" data" get-chunk ;
 : data->n ( c-addr -- n ) 4 + ul@ 2 / ;
 : data->samps ( c-addr -- c-addr ) 8 + ;
+
+: wav->n ( c-addr -- u ) get-chunks get-data-chunk data->n ;
+: wav->frame-sz ( c-addr -- u ) get-chunks get-fmt-chunk v. fmt->chans fmt->byterate * ;
+: mk-wav->nth-frame ( compilation: c-addr -- runtime: u -- c-addr ) ]] [[ dup wav->frame-sz ]] literal * [[ get-chunks get-data-chunk data->samps ]] literal + [[ ;
+: mk-read-sample ( compilation: u -- runtime: c-addr -- n ) CASE
+  1 OF POSTPONE c@ ENDOF
+  2 OF POSTPONE sw@ ENDOF
+  4 OF POSTPONE @ ENDOF
+  0 POSTPONE literal ENDCASE ;
+: mk-read-2-samples ( compilation: u -- runtime: c-addr -- n n ) ]] dup [[ dup mk-read-sample dup ]] literal rot + [[ mk-read-sample ;
+: mk-frame->as-stereo ( compilation: c-addr -- runtime: c-addr -- n n ) get-chunks get-fmt-chunk v. fmt->byterate fmt->chans 2 = IF mk-read-2-samples ELSE mk-read-sample POSTPONE dup THEN ;
+: mk-wav->stereo-sample ( compilation: c-addr -- runtime: u -- n n ) v. mk-wav->nth-frame  mk-frame->as-stereo ;

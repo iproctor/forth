@@ -71,5 +71,5 @@ init-ring constant ring
   pa-terminate
   bye ;
 
-main-ring
+\ main-ring
 \ main

@@ -4,7 +4,7 @@ require ../combis.fs
 2 value channels
 48000 value sample-rate
 2 value sample-bytes
-100 value buf-dur-ms
+50 value buf-dur-ms
 
 : \frame channels sample-bytes * ;
 : frame-count sample-rate buf-dur-ms * 1000 / ;
