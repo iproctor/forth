@@ -23,7 +23,7 @@ require ../combis.fs
 : ring>write-ptr@ ( ring -- c-addr ) ring>write-ptr @ ;
 : ring>sz ( ring -- u ) ring>write-ptr cell+ @ ;
 : ring>data ( ring -- c-addr ) ring>write-ptr 2 cells + ;
-: init-ring ( -- ring ) 4 cells \ring + dup allocate throw dup rot erase  ;
+: init-ring ( -- ring ) 4 cells \ring + allocz ;
 : read-after-write? ( ring -- flag ) v. ring>read-ptr@ ring>write-ptr@ > ;
 
 \ Writes
