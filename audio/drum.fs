@@ -27,7 +27,7 @@ create stream 0 ,
   ." Created stream" cr
   stream @ pa-start-stream throw
   ." Started stream" cr
-  4000 pa-sleep
+  1000 pa-sleep
   stream @ pa-stop-stream throw
   ." Stopped stream" cr
   stream @ pa-close-stream throw
@@ -37,8 +37,8 @@ create stream 0 ,
 fmt-chunk fmt->srate to sample-rate
 : samp++ ( -- n ) cur-samp sw@  1 samp-ptr +!  ;
 init-ring constant ring
-: fill-ring ring ring-capacity dup 100 < IF drop exit THEN
-  1- rem-samps min dup >r 0 U+DO
+: fill-ring ring ring-capacity 1- dup 100 < IF drop exit THEN
+    rem-samps min dup >r 0 U+DO
     samp++ dup i ring ring-frame+!
   LOOP
   r> ring ring-adv-write ;
@@ -47,13 +47,16 @@ init-ring constant ring
     rem-samps WHILE
     fill-ring  10 pa-sleep
   REPEAT ;
+: drain-ring BEGIN ring ring-count WHILE 10 pa-sleep REPEAT ;
 
 
-: cb-r { ibuf obuf fpb ti sf ud -- n } obuf fpb brate * erase  obuf fpb ring ring-read drop  ring ring-capacity IF 0 ELSE 1 THEN ;
+: check-ring-count ring ring-count 256 < IF ." UNDERFLOW" cr THEN ;
+: cb-r { ibuf obuf fpb ti sf ud -- n } obuf fpb brate * erase  check-ring-count  obuf fpb ring ring-read drop  ring ring-count IF 0 ELSE 1 THEN ;
 ' cb-r pa-stream-callback: constant ring-cb
 
 : main-ring
   fill-ring
+  ring ring-capacity . cr
   pa-initialize throw
   ." Initialized" cr
   stream 0  2  0x8  fmt-chunk fmt->sratef  256 ring-cb  0 pa-open-default-stream throw
@@ -61,9 +64,12 @@ init-ring constant ring
   stream @ pa-start-stream throw
   ." Started stream" cr
   fill-loop
-  500 pa-sleep
+  drain-ring
   stream @ pa-stop-stream throw
   ." Stopped stream" cr
   stream @ pa-close-stream throw
   pa-terminate
   bye ;
+
+main-ring
+\ main

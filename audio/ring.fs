@@ -8,7 +8,7 @@ require ../combis.fs
 
 : \frame channels sample-bytes * ;
 : frame-count sample-rate buf-dur-ms * 1000 / ;
-: \ring sample-rate \frame * ;
+: \ring frame-count \frame * ;
 
 : frames ( u -- u ) \frame * ;
 : left-channel ( c-addr -- c-addr ) ;
@@ -23,11 +23,12 @@ require ../combis.fs
 : ring>write-ptr@ ( ring -- c-addr ) ring>write-ptr @ ;
 : ring>sz ( ring -- u ) ring>write-ptr cell+ @ ;
 : ring>data ( ring -- c-addr ) ring>write-ptr 2 cells + ;
-: init-ring ( -- ring ) 4 cells \ring + allocate throw  0 over ring>read-ptr !  0 over ring>write-ptr ! ;
+: init-ring ( -- ring ) 4 cells \ring + dup allocate throw dup rot erase  ;
 : read-after-write? ( ring -- flag ) v. ring>read-ptr@ ring>write-ptr@ > ;
 
 \ Writes
 : ring-capacity ( ring -- u ) dup read-after-write? IF v. ring>read-ptr@ ring>write-ptr@ - ELSE v. ring>write-ptr@ ring>read-ptr@ - frame-count swap - THEN ;
+: ring-count ring-capacity frame-count swap - ;
 : ring-capacity-ms ( ring -- u ) ring-capacity 1000 * sample-rate / ;
 : frame-write-offset-index ( u ring -- u ) ring>write-ptr@ + frame-count mod ;
 : frame-at-write-offset ( u ring -- c-addr ) dup >r frame-write-offset-index frames r> ring>data + ;
