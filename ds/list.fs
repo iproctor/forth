@@ -42,7 +42,7 @@ require ../utils.fs
 : alloc-push ( u list -- c-addr list ) swap allocate throw dup rot list-prepend ;
 : free-mem-list ( list -- ) dup for-list[ list->val @ free throw ]for-list list-free ;
 
-: new-list-anchor ( -- list-anchor ) 2 cells allocate throw  dup 2 cells erase ;
+: new-list-anchor ( -- list-anchor ) 2 cells allocz ;
 : list-anchor->list ;
 : list-anchor->list@  list-anchor->list @ ;
 : list-anchor->end cell+ ;

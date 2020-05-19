@@ -6,8 +6,9 @@ require ../audio/wav.fs
 
 : voice>gen-xt ( voice -- c-addr ) ;
 : voice>destr-xt ( voice -- c-addr ) voice>gen-xt cell+ ;
-: voice>data ( voice -- c-addr ) voice>destr-xt cell+ ;
-: voice>gen ( u voice -- n n flag ) dup voice>gen-xt @ execute ;
+: voice>t0 ( voice -- c-addr ) voice>destr-xt cell+ ;
+: voice>data ( voice -- c-addr ) voice>t0 cell+ ;
+: voice>gen ( u voice -- n n flag ) dup >r voice>t0 @ - r> voice>gen-xt @ execute ;
 : voice-free ( voice -- ) dup dup voice>destr-xt @ execute  free throw ;
 
 : mk-wav-gen-body ( compilation: wav -- runtime: u voice -- n n flag ) { wav } ]] drop dup [[ wav wav->n ]] literal >= IF
@@ -15,4 +16,4 @@ require ../audio/wav.fs
 : mk-wav-gen ( wav -- xt ) >r :noname r> mk-wav-gen-body POSTPONE ; ;
 : wav-destr ;
 
-: new-wav-voice ( c-addr -- voice ) >r 4 cells allocz  dup voice>gen-xt  r@ mk-wav-gen  swap !  dup voice>destr-xt ['] wav-destr swap !  dup voice>data r> swap ! ;
+: new-wav-voice ( u xt -- voice ) 3 cells allocz >r  r@ voice>gen-xt !  ['] wav-destr r@ voice>destr-xt !  r@ voice>t0 ! r> ;

@@ -19,6 +19,7 @@ require combis.fs
 : 2!r ( w w c-addr -- ) v swap 2! ;
 : 2@r ( c-addr -- w w ) 2@ swap ;
 : 3!r ( w w w c-addr -- ) >r -rot r@ 2!r r> 2 cells + ! ;
+: 4!r ( w w w w c-addr -- ) swap >r v. 3!r 3 cells + r> swap ! ;
 
 : 2elem@ ( w-addr u u -- w w ) >r over swap cells + @ swap r> cells + @ ;
 
