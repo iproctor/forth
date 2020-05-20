@@ -24,3 +24,7 @@ require combis.fs
 : 2elem@ ( w-addr u u -- w w ) >r over swap cells + @ swap r> cells + @ ;
 
 : dup3rd ( w w w -- w w w w ) 2>r dup 2r> ;
+: nip3rd ( w w w -- w w ) rot drop ;
+: 3drop drop 2drop ;
+
+1 63 lshift 1- constant max-int

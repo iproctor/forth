@@ -16,4 +16,4 @@ require ../audio/wav.fs
 : mk-wav-gen ( wav -- xt ) >r :noname r> mk-wav-gen-body POSTPONE ; ;
 : wav-destr ;
 
-: new-wav-voice ( u xt -- voice ) 3 cells allocz >r  r@ voice>gen-xt !  ['] wav-destr r@ voice>destr-xt !  r@ voice>t0 ! r> ;
+: new-wav-voice ( xt -- voice ) 3 cells allocz >r  r@ voice>gen-xt !  ['] wav-destr r@ voice>destr-xt !  r> ;
