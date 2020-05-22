@@ -28,3 +28,5 @@ require combis.fs
 : 3drop drop 2drop ;
 
 1 63 lshift 1- constant max-int
+
+: /up ( n n -- n ) /mod swap IF 1+ THEN ;

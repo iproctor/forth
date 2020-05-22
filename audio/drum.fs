@@ -51,15 +51,14 @@ init-ring constant ring
 
 
 : check-ring-count ring ring-count 256 < IF ." UNDERFLOW" cr THEN ;
-: cb-r { ibuf obuf fpb ti sf ud -- n } obuf fpb brate * erase  check-ring-count  obuf fpb ring ring-read drop  ring ring-count IF 0 ELSE 1 THEN ;
-' cb-r pa-stream-callback: constant ring-cb
+\ : cb-r { ibuf obuf fpb ti sf ud -- n } obuf fpb brate * erase  check-ring-count  obuf fpb ring ring-read drop  ring ring-count IF 0 ELSE 1 THEN ;
 
 : main-ring
   fill-ring
   ring ring-capacity . cr
   pa-initialize throw
   ." Initialized" cr
-  stream 0  2  0x8  fmt-chunk fmt->sratef  256 ring-cb  0 pa-open-default-stream throw
+  stream 0  2  0x8  fmt-chunk fmt->sratef  256 ring-cb  ring pa-open-default-stream throw
   ." Created stream" cr
   stream @ pa-start-stream throw
   ." Started stream" cr
@@ -71,5 +70,5 @@ init-ring constant ring
   pa-terminate
   bye ;
 
-\ main-ring
+ main-ring
 \ main

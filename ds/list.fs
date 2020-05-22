@@ -4,6 +4,7 @@ require ../utils.fs
 : list->next ( list -- c-addr ) ;
 : list->next@ ( list -- c-addr ) @ ;
 : list->val ( list -- c-addr ) cell+ ;
+: list->val@ ( list -- c-addr ) list->val @ ;
 : list-prepend ( w list -- list ) 2 cells allocate throw dup >r list->next !  r@ list->val !  r> ;
 : list-prepend2 ( w w list -- list ) 3 cells allocate throw dup >r list->next !  r@ list->val 2! r> ;
 : list-append ( w list -- list ) 2 cells allocate throw  dup 2 cells erase  dup >r swap list->next !  r@ list->val ! r> ;
@@ -54,7 +55,7 @@ require ../utils.fs
 : list-anchor-append ( w list-anchor -- ) dup list-anchor->end @ dup 0= IF drop list-anchor-prepend exit THEN
   rot swap list-append  swap list-anchor->end ! ;
 : list-anchor-to-list ( list-anchor -- list ) v. list-anchor->list@ free throw ;
-: for-list-anch-val ]] list-anchor->list@ for-list[ [[ ; immediate
+: for-list-anc-val[ ]] list-anchor->list@ for-list[ [[ ; immediate
 
 : list-n ( list -- u ) 0 swap for-list[ drop 1+ ]for-list ;
 : list-to-arr ( list -- w-addr u ) dup list-n cells allocate throw  0 rot for-list[ >r 2dup cells + r> list->val @ swap !  1+ ]for-list ;

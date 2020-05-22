@@ -52,3 +52,7 @@ require ../utils.fs
 : ring-read ( c-addr u ring -- u ) dup read-after-write? IF dup >r read-until-end r> swap ELSE 0 THEN
   >r over 0= IF drop 2drop r> exit THEN
   dup >r v. ring>write-ptr@ ring>read-ptr@ - min  r> read-and-adv  r> + ;
+
+: ring-pa-callback { ibuf obuf fpb ti sf ring -- n } obuf fpb \frame * erase  obuf fpb ring ring-read drop  ring ring-count IF 0 ELSE 1 THEN ;
+
+' ring-pa-callback pa-stream-callback: constant ring-cb

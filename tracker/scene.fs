@@ -1,5 +1,7 @@
 require ../utils.fs
 require ../ds/list.fs
+require sequence.fs
+require instrument.fs
 
 : scn-slot>seq ;
 : scn-slot>seq@ @ ;
@@ -7,7 +9,7 @@ require ../ds/list.fs
 : scn-slot>loop 2 cells + ;
 \ multiplier is power of 2 exponent on speed of playback. range is -4 (whole note steps) to 2 (64th steps. 0 is 16th steps)
 : scn-slot>multiplier 3 cells + ;
-: new-scn-slot ( seq inst flag mult -- scn-slot ) 4 cells allocz v. 4!r ;
+: new-scn-slot ( seq inst loop? mult -- scn-slot ) 4 cells allocz v. 4!r ;
 
 : scn-slot-scn-steps ( scn-slot -- u ) scn-slot>seq @ list-n ;
 \ in 64ths
@@ -41,7 +43,7 @@ require ../ds/list.fs
 
 : seek-next-trig ( scn-slot node -- node u )
   dup seek-next-trig-until-end ( slot nth-node node u ) over IF 2swap 2drop exit THEN
-  nip rot ( nth-node u slot ) dup sn-slot>loop @ 0= IF 3drop 0 max-int exit THEN
+  nip rot ( nth-node u slot ) dup scn-slot>loop @ 0= IF 3drop 0 max-int exit THEN
   scn-slot>seq@ swap seek-next-trig-until-node over 0= IF drop max-int THEN ;
 
 : scn-slot-next-trig ( u scn-slot -- node u ) tuck scn-slot>seq@ list-nth seek-next-trig ;
@@ -73,8 +75,8 @@ require ../ds/list.fs
 : scene>dur cell+ ;
 : new-scene new-list-anchor 2 cells allocz v. ! ;
 \ in 64ths
-: add-scn-slot-dur ( n n -- n ) over -1 = IF 2drop -1 ELSE + THEN ;
+: add-scn-slot-dur ( n n -- n ) over -1 = IF 2drop -1 ELSE dup -1 = IF nip ELSE max THEN THEN ;
 : scene-dur ( scene -- u ) dup scene>dur @ dup IF nip exit THEN drop  scene>slots @ list-anchor->list@  0 swap  for-list[ list->val @ scn-slot-dur add-scn-slot-dur ]for-list ;
 
-: add-to-scene ( seq inst flag mult scene -- ) v new-scn-slot scene>slots @ list-anchor-append ;
+: add-to-scene ( seq inst loop? mult scene -- ) v new-scn-slot scene>slots @ list-anchor-append ;
 

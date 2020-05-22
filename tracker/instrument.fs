@@ -1,6 +1,7 @@
 require ../ds/list.fs
 require ../ds/sort.fs
 require sequence.fs
+require voice.fs
 
 \ F - E
 create note-keys CHAR a , CHAR , , CHAR o , CHAR . , CHAR e , CHAR p , CHAR u , CHAR i , CHAR f , CHAR d , CHAR g , CHAR h ,
@@ -8,7 +9,7 @@ create note-keys CHAR a , CHAR , , CHAR o , CHAR . , CHAR e , CHAR p , CHAR u , 
 : instrument>xt ( instrument -- xt ) @ ;
 : instrument>data ( instrument -- w ) cell+ @ ;
 : instrument>trigger ( note oct instrument -- voice ) v. instrument>data instrument>xt execute ;
-: instrument-play-trigger ( trigger instrument -- voice ) >r triger-notes 2@ r> instrument>trigger ;
+: instrument-play-trigger ( trigger instrument -- voice ) >r trigger-notes 2@ r> instrument>trigger ;
 
 create path-buf 256 allot
 0 value path-buf-len
@@ -37,10 +38,9 @@ create path-buf 256 allot
   2drop
   r> list-anchor-to-list list-to-arr 2dup sample-sort ;
 
-\ takes current sample clock
-: trigger-sample ( u sample -- voice ) sample>gen new-wav-voice ;
+: trigger-sample ( sample -- voice ) sample>gen new-wav-voice ;
 
-: samples-trigger-note ( u u samples -- voice ) >r note-index-to-note cells r> + trigger-sample ;
+: samples-trigger-note ( u u samples -- voice ) >r note-to-note-index cells r> + trigger-sample ;
 
 : new-samples-instrument ( samples -- instrument ) ['] samples-trigger-note  2 cells allocz  v 2! ;
 
