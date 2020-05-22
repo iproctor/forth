@@ -40,8 +40,8 @@ create path-buf 256 allot
 
 : trigger-sample ( sample -- voice ) sample>gen new-wav-voice ;
 
-: samples-trigger-note ( u u samples -- voice ) >r note-to-note-index cells r> + trigger-sample ;
+: samples-trigger-note ( u u samples -- voice ) >r note-to-note-index cells r> + @ trigger-sample ;
 
-: new-samples-instrument ( samples -- instrument ) ['] samples-trigger-note  2 cells allocz  v 2! ;
+: new-samples-instrument ( samples -- instrument ) ['] samples-trigger-note  2 cells allocz  v. 2! ;
 
 

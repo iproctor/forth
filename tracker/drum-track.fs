@@ -1,7 +1,7 @@
 require orchestrator.fs
 
 s" samples/KickDrum/" load-samples drop new-samples-instrument constant kickdrum
-s" samples/SnareDrum/" load-samples drop new-samples-instrument constant snaredrum
+\ s" samples/SnareDrum/" load-samples drop new-samples-instrument constant snaredrum
 
 : qdrum <c0> <-> <-> <-> ;
 : qrest <-> <-> <-> <-> ;
@@ -11,9 +11,12 @@ s" samples/SnareDrum/" load-samples drop new-samples-instrument constant snaredr
 
 new-scene constant scene0
 kickseq kickdrum false 0 scene0 add-to-scene
-snareseq snaredrum false 0 scene0 add-to-scene
+\ snareseq snaredrum false 0 scene0 add-to-scene
 
 scene0 add-scene
+
+scene0 scene>slots @ list-anchor->list@ list->val@ constant kickslot
+\ scene0 scene>slots @ list-anchor->list@ list->next@ list->val@ constant snareslot
 
 init-ring constant ring
 : drain-ring BEGIN ring ring-count WHILE 10 pa-sleep REPEAT ;

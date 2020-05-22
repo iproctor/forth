@@ -66,9 +66,14 @@ require instrument.fs
   over IF 3drop max-int ELSE nip v scn-slot-step-dur 1+ * THEN ;
 
 : scn-slot-fire-trigger-at ( 64ths scn-slot -- 64ths voice )
+  \ ." scn-slot-fire-trigger-at" .s cr
   tuck seq-trig-after-offset ( scn-slot node 64ths-shortfall ) dup IF v 2drop 0 exit THEN
+  \ ." seq-trig-after-offset" .s cr
   drop 2dup swap scn-slot-play-seq-node ( scn-lot node voice )
-  -rot swap scn-slot-steps-to-next-event ( voice steps ) swap ;
+  \ ." scn-slot-play-seq-node" .s cr
+  -rot swap scn-slot-steps-to-next-event ( voice steps ) swap
+  \ ." scn-slot-steps-to-next-event" .s cr
+  ;
 
 : scene>slots ;
 \ dur in 64th steps. if 0 the length of the longest non looping seq, or inf
