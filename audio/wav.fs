@@ -15,11 +15,12 @@ require ../utils.fs
 : fmt->byterate ( c-addr -- n ) fmt->bitrate 8 / ;
 
 : get-data-chunk ( c-addr -- c-addr ) s" data" get-chunk ;
-: data->n ( c-addr -- n ) 4 + ul@ 2 / ;
+: data->n ( u c-addr -- n ) 4 + ul@ swap / ;
 : data->samps ( c-addr -- c-addr ) 8 + ;
 
-: wav->n ( c-addr -- u ) get-chunks get-data-chunk data->n ;
 : wav->frame-sz ( c-addr -- u ) get-chunks get-fmt-chunk v. fmt->chans fmt->byterate * ;
+: wav->n ( c-addr -- u ) dup >r wav->frame-sz r> get-chunks get-data-chunk data->n ;
+: print-frame ( frame u -- ) dup 10000 mod 0= IF ." getting frame " . ." at " . cr ELSE 2drop THEN ;
 : mk-wav->nth-frame ( compilation: c-addr -- runtime: u -- c-addr ) ]] [[ dup wav->frame-sz ]] literal * [[ get-chunks get-data-chunk data->samps ]] literal + [[ ;
 : mk-read-sample ( compilation: u -- runtime: c-addr -- n ) CASE
   1 OF POSTPONE c@ ENDOF

@@ -1,7 +1,8 @@
 require orchestrator.fs
 
-s" samples/KickDrum/" load-samples drop 0.5e new-samples-instrument constant kickdrum
-s" samples/SnareDrum/" load-samples drop 0.5e new-samples-instrument constant snaredrum
+0  s" samples/KickDrum/" load-samples drop 0.3e new-samples-instrument constant kickdrum
+0  s" samples/SnareDrum/" load-samples drop 0.3e new-samples-instrument constant snaredrum
+3 4 note-to-note-index s" samples/SynPiano/" load-samples drop 0.3e new-samples-instrument constant synpiano
 
 : qdrum <d0> <-> <-> <-> ;
 : qdrum2 <-> <-> <d0> <-> ;
@@ -10,9 +11,17 @@ s" samples/SnareDrum/" load-samples drop 0.5e new-samples-instrument constant sn
 <| qdrum qdrum2 qdrum2 qdrum |> constant kickseq
 <| qrest qdrum qrest qdrum |> constant snareseq
 
+: qn1 <e5> <-> <-> <-> ;
+: qn2 <a5> <-> <-> <-> ;
+: qn3 <-> <-> <a5> <-> ;
+: qn4 <e5> <-> <a5> <-> ;
+ <| qn1 qrest qn2 qrest  qn3 qn4 qrest qrest |> constant synseq
+\ <| qn1 qrest qrest qrest |> constant synseq
+
 new-scene constant scene0
 kickseq kickdrum true 0 scene0 add-to-scene
 snareseq snaredrum true 0 scene0 add-to-scene
+synseq synpiano true 0 scene0 add-to-scene
 
 scene0 add-scene
 

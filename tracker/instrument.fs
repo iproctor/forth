@@ -9,7 +9,7 @@ create note-keys CHAR a , CHAR , , CHAR o , CHAR . , CHAR e , CHAR p , CHAR u , 
 : instrument>xt ( instrument -- xt ) @ ;
 : instrument>data ( instrument -- w ) cell+ @ ;
 : instrument>gain ( instrument -- r ) 2 cells + f@ ;
-: instrument>trigger ( note oct instrument -- voice ) v. instrument>data v. instrument>gain instrument>xt execute ;
+: instrument>trigger ( note oct instrument -- voice ) dup instrument>xt execute ;
 : instrument-play-trigger ( trigger instrument -- voice ) >r trigger-notes 2@ r> instrument>trigger ;
 
 create path-buf 256 allot
@@ -39,10 +39,15 @@ create path-buf 256 allot
   2drop
   r> list-anchor-to-list list-to-arr 2dup sample-sort ;
 
-: trigger-sample ( r:gain sample -- voice ) sample>gen new-wav-voice ;
+: trigger-sample ( r:gain sample -- voice )
+  ." trigger sample " dup sample>name type cr
+  sample>gen new-wav-voice ;
 
-: samples-trigger-note ( u u samples r:gain -- voice ) >r note-to-note-index cells r> + @ trigger-sample ;
+: sample-instrument>offset 3 cells + @ ;
+: samples-trigger-note ( u u instrument -- voice )
+  >r note-to-note-index  r@ sample-instrument>offset -  cells r@ instrument>data + @
+  r> instrument>gain  trigger-sample ;
 
-: new-samples-instrument ( r:gain samples -- instrument ) ['] samples-trigger-note  3 cells allocz  v. 2!  dup 2 cells + f! ;
+: new-samples-instrument ( r:gain offset samples -- instrument ) ['] samples-trigger-note  4 cells allocz  v. 2!  dup >r 2 cells + f!  r@ 3 cells + ! r> ;
 
 

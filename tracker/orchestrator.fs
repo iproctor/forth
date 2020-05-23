@@ -31,7 +31,7 @@ new-list-anchor constant active-voices
     ( prev-next )
     dup @ WHILE
     dup @ list->val @ 2r@ rot play-voice
-    IF dup active-voices list-anchor-rm-node ELSE list->next @ THEN
+    IF ." rm voice" cr dup active-voices list-anchor-rm-node ELSE list->next @ THEN
   REPEAT drop 2rdrop ;
 
 : current-scene-and-offset ( -- 64th-offset scene ) 64ths-clock drop scene-list list-anchor->list@ BEGIN

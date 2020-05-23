@@ -23,7 +23,7 @@ require ../ds/list.fs
 : new-note ( u u -- ) 4 cells allocate throw  dup trigger:note default-dur init-trig  v. trigger-notes2! append-to-seq ;
 : trigger-note? ( trigger -- flag ) trigger-type @ trigger:note = ;
 
-create note-names s" c" 2, s" c#" 2, s" d" 2, s" d#" 2, s" e" 2, s" f" 2, s" f#" 2, s" g" 2, s" g#" 2, s" a" 2, s" a#" 2, s" b" 2,
+create note-names s" a" 2, s" a#" 2, s" b" 2, s" c" 2, s" c#" 2, s" d" 2, s" d#" 2, s" e" 2, s" f" 2, s" f#" 2, s" g" 2, s" g#" 2,
 : note-to-name ( u -- c-addr u ) 2* cells note-names + 2@ ;
 : hold-str ( c-addr u -- ) BEGIN dup WHILE 2dup + 1- c@ hold  1- REPEAT 2drop ;
 : note-index-to-note ( u -- u u ) 12 /mod ;
