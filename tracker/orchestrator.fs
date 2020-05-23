@@ -9,14 +9,18 @@ require ../utils.fs
 : advance-sample-clock ( u -- ) sample-clock + to sample-clock ;
 100 value bpm
 
-: 64ths-clock sample-clock bpm samples->64ths ;
+: samples-per-64th 1 bpm 64ths->samples ;
+: 64ths-clock ( -- u flag ) sample-clock samples-per-64th /mod swap 0= ;
 : on-64th? 64ths-clock nip ;
+: samples-until-64th ( -- u ) sample-clock samples-per-64th /mod-round-up drop
+  dup 0= IF drop samples-per-64th THEN ;
 
 new-list-anchor constant scene-list
 : add-scene ( scene -- ) scene-list list-anchor-append ;
 
 new-list-anchor constant active-voices
-: add-active-voice ( voice -- ) ." add voice" .s cr dup voice>t0 sample-clock swap !  active-voices list-anchor-append ;
+: add-active-voice ( voice -- ) dup voice>t0 sample-clock swap !  active-voices list-anchor-append ;
+: no-active-voices? ( -- flag ) active-voices list-anchor->list@ 0= ;
 \ true if voice is done
 : play-voice ( samps ring voice -- flag ) rot 0 U+DO
     dup i swap voice>gen IF 2drop 2drop unloop true exit THEN
@@ -37,25 +41,15 @@ new-list-anchor constant active-voices
       2dup < IF drop r> list->val@ exit ELSE - r> list->next@ THEN
     0 ENDCASE
   REPEAT ;
-: fire-pending-triggers ( offset scene -- n ) max-int -rot  scene>slots @ for-list-anc-val[
-    ( steps-to-next-trig offset scn-slot )
+: fire-scene-triggers ( offset scene -- ) scene>slots @ for-list-anc-val[
     v dup  scn-slot-fire-trigger-at dup IF add-active-voice ELSE drop THEN
-    ( min-steps-to-next-trig offset step-to-next-trig )
-    swap v min
   ]for-list drop ;
-
-\ this is wrong
-\ first play voices up to ring cap or next 64th
-\ then see if triggers need to be fired
-\ repeat
-\ dont even need to look ahead for the next trigger. just check on every 64ths
-\ if there is a trigger that needs firing.
+: iteration-samples ( ring -- u ) ring-capacity 1-  samples-until-64th min ;
+: fire-pending-triggers ( -- flag ) current-scene-and-offset dup IF
+    fire-scene-triggers false ELSE no-active-voices? THEN ;
 : orch-fill-ring ( ring -- flag ) BEGIN
-    dup ring-capacity 1- dup 100 < IF 2drop false exit THEN
-    on-64th? IF
-      current-scene-and-offset dup 0= IF 2drop 2drop true exit THEN
-      fire-pending-triggers bpm 64ths->samples min
-    THEN
+    dup iteration-samples dup 100 < IF 2drop false exit THEN
+    on-64th? IF fire-pending-triggers IF 2drop true exit THEN THEN
     dup >r  over play-voices
     r> v. advance-sample-clock  over ring-adv-write
   AGAIN drop false ;

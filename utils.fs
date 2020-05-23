@@ -30,3 +30,4 @@ require combis.fs
 1 63 lshift 1- constant max-int
 
 : /up ( n n -- n ) /mod swap IF 1+ THEN ;
+: /mod-round-up ( n n -- n n ) dup >r /mod swap dup IF r> swap - swap 1+ ELSE swap rdrop THEN ;

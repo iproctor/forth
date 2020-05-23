@@ -17,63 +17,22 @@ require instrument.fs
 \ dur in 64th steps. -1 if infinite
 : scn-slot-seq-dur ( scn-slot -- u ) v. scn-slot-scn-steps scn-slot-step-dur * ;
 : scn-slot-dur ( scn-slot -- n ) dup scn-slot>loop @ IF drop -1 ELSE scn-slot-seq-dur THEN ;
-: scn-slot-within-dur ( 64ths scn-slot -- flag ) scn-slot-dur CASE
-    -1 OF drop true ENDOF
-    < 0
-  ENDCASE ;
 
 \ flag if evenly on the seq step
 : scn-step-from-64ths ( 64ths scn-slot -- u flag ) scn-slot-step-dur /mod swap 0= ;
 
-: /mod-round-up ( n n -- n n ) dup >r /mod swap dup IF r> swap - swap 1+ ELSE swap rdrop THEN ;
-
 \ Flag is true when offset past duration
 : adjust-offset-for-loop ( offset scn-slot -- offset' flag ) v. scn-slot-seq-dur scn-slot>loop @ IF mod false ELSE v dup >= THEN ;
+: scn-slot-nth-trig ( u scn-slot -- trigger ) scn-slot>seq@ list-nth list->val@ ;
+: seq-trig-at-offset ( 64ths scn-slot -- trigger )
+  v. adjust-offset-for-loop swap IF 2drop 0 exit THEN
+  v. scn-step-from-64ths swap 0= IF 2drop 0 exit THEN
+  scn-slot-nth-trig ;
 
-: seek-next-trig-until-end ( node -- node u ) 0 BEGIN
-    over while
-    over list->val @ trigger-note? IF exit THEN
-    v list->next@ 1+
-  REPEAT ;
-: seek-next-trig-until-node ( node node u -- node u ) BEGIN
-    >r 2dup <> r> swap WHILE
-    over list->val @ trigger-note? 0= WHILE
-    v list->next@ 1+
-  AGAIN THEN THEN nip3rd ;
+: scn-slot-play-trigger ( trigger scn-slot -- voice ) scn-slot>instrument @ instrument-play-trigger ;
 
-: seek-next-trig ( scn-slot node -- node u )
-  dup seek-next-trig-until-end ( slot nth-node node u ) over IF 2swap 2drop exit THEN
-  nip rot ( nth-node u slot ) dup scn-slot>loop @ 0= IF 3drop 0 max-int exit THEN
-  scn-slot>seq@ swap seek-next-trig-until-node over 0= IF drop max-int THEN ;
-
-: scn-slot-next-trig ( u scn-slot -- node u ) tuck scn-slot>seq@ list-nth seek-next-trig ;
-
-: scn-slot-next-index ( 64ths scn-slot -- 64ths u ) scn-slot-step-dur /mod-round-up ;
-
-: seq-trig-after-offset ( 64ths scn-slot -- node 64ths )
-  v. adjust-offset-for-loop swap IF 2drop 0 max-int exit THEN
-  ( 64ths scn-slot )
-  v. scn-slot-next-index
-  ( 64ths idx scn-slot )
-  v. scn-slot-next-trig
-  ( 64ths node idx scn-lot )
-  scn-slot-step-dur * rot + ;
-
-
-: scn-slot-play-seq-node ( seq-node scn-slot -- voice ) v list->val@ scn-slot>instrument @ instrument-play-trigger ;
-
-: scn-slot-steps-to-next-event ( node scn-slot -- 64ths ) dup rot list->next @ seek-next-trig
-  over IF 3drop max-int ELSE nip v scn-slot-step-dur 1+ * THEN ;
-
-: scn-slot-fire-trigger-at ( 64ths scn-slot -- 64ths voice )
-  \ ." scn-slot-fire-trigger-at" .s cr
-  tuck seq-trig-after-offset ( scn-slot node 64ths-shortfall ) dup IF v 2drop 0 exit THEN
-  \ ." seq-trig-after-offset" .s cr
-  drop 2dup swap scn-slot-play-seq-node ( scn-lot node voice )
-  \ ." scn-slot-play-seq-node" .s cr
-  -rot swap scn-slot-steps-to-next-event ( voice steps ) swap
-  \ ." scn-slot-steps-to-next-event" .s cr
-  ;
+: scn-slot-fire-trigger-at ( 64ths scn-slot -- voice )
+  tuck seq-trig-at-offset dup 0= IF nip exit THEN swap scn-slot-play-trigger ;
 
 : scene>slots ;
 \ dur in 64th steps. if 0 the length of the longest non looping seq, or inf
