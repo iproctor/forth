@@ -1,4 +1,5 @@
 require orchestrator.fs
+require sample_instrument.fs
 
 0  s" samples/KickDrum/" load-samples drop 0.3e new-samples-instrument constant kickdrum
 0  s" samples/SnareDrum/" load-samples drop 0.3e new-samples-instrument constant snaredrum

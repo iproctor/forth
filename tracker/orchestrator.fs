@@ -2,6 +2,7 @@ require ../audio/portaudio.fs
 require ../ds/list.fs
 require ../ds/dlist.fs
 require scene.fs
+require voice.fs
 require ../audio/ring.fs
 require bpm.fs
 require ../utils.fs
