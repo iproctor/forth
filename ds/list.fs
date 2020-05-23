@@ -14,7 +14,7 @@ require ../utils.fs
 : show-list ( list -- ) for-list[ ." ( " list->val @ . ." )" ]for-list ;
 : show-list2 ( list -- ) for-list[ ." ( " list->val 2@ swap . . ." )" ]for-list ;
 : list-free ( list -- ) BEGIN dup WHILE v. list->next free throw @ REPEAT drop ;
-: list-nth ( u list -- list ) BEGIN 2dup and WHILE v 1- list->next @ REPEAT nip ;
+: list-nth ( u list -- list ) BEGIN 2dup && WHILE v 1- list->next @ REPEAT nip ;
 
 : list-consume-while[ ]] BEGIN
     >r r@ WHILE
@@ -59,3 +59,4 @@ require ../utils.fs
 
 : list-n ( list -- u ) 0 swap for-list[ drop 1+ ]for-list ;
 : list-to-arr ( list -- w-addr u ) dup list-n cells allocate throw  0 rot for-list[ >r 2dup cells + r> list->val @ swap !  1+ ]for-list ;
+: list-anchor-rm-node ( list-ptr list-anchor -- ) 2dup v @ list-anchor->end @ = IF 0 swap list-anchor->end ! ELSE drop THEN list-rm-node ;

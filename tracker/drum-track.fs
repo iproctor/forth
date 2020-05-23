@@ -1,17 +1,18 @@
 require orchestrator.fs
 
-s" samples/KickDrum/" load-samples drop new-samples-instrument constant kickdrum
-\ s" samples/SnareDrum/" load-samples drop new-samples-instrument constant snaredrum
+s" samples/KickDrum/" load-samples drop 0.5e new-samples-instrument constant kickdrum
+s" samples/SnareDrum/" load-samples drop 0.5e new-samples-instrument constant snaredrum
 
-: qdrum <c0> <-> <-> <-> ;
+: qdrum <d0> <-> <-> <-> ;
+: qdrum2 <-> <-> <d0> <-> ;
 : qrest <-> <-> <-> <-> ;
 
-<| qdrum qrest qdrum qrest |> constant kickseq
+<| qdrum qdrum2 qdrum2 qdrum |> constant kickseq
 <| qrest qdrum qrest qdrum |> constant snareseq
 
 new-scene constant scene0
-kickseq kickdrum false 0 scene0 add-to-scene
-\ snareseq snaredrum false 0 scene0 add-to-scene
+kickseq kickdrum true 0 scene0 add-to-scene
+snareseq snaredrum true 0 scene0 add-to-scene
 
 scene0 add-scene
 
@@ -24,7 +25,7 @@ init-ring constant ring
 create stream 0 ,
 
 : main-ring
-  ring orch-fill-ring
+  ring orch-fill-ring drop
   pa-initialize throw
   ." Initialized" cr
   stream 0  2  0x8  sample-rate s>f  256 ring-cb  ring pa-open-default-stream throw
@@ -32,9 +33,10 @@ create stream 0 ,
   stream @ pa-start-stream throw
   ." Started stream" cr
   ring orch-fill-loop
+  ." Draining" cr
   drain-ring
   stream @ pa-stop-stream throw
   ." Stopped stream" cr
   stream @ pa-close-stream throw
   pa-terminate
-  bye ;
+  ;

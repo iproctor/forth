@@ -10,11 +10,13 @@ require ../utils.fs
 : \frame channels sample-bytes * ;
 : frame-count sample-rate buf-dur-ms * 1000 / ;
 : \ring frame-count \frame * ;
+: max-sample-mag 1 sample-bytes 8 * 1- lshift ;
 
 : frames ( u -- u ) \frame * ;
 : left-channel ( c-addr -- c-addr ) ;
 : right-channel ( c-addr -- c-addr ) sample-bytes + ;
-: w+! ( n c-addr -- ) tuck sw@ + swap w! ;
+: clip-sample ( n -- n ) max-sample-mag min  max-sample-mag negate  max ;
+: w+! ( n c-addr -- ) tuck sw@ + clip-sample swap  w! ;
 : add-left ( n c-addr -- ) left-channel w+! ;
 : add-right ( n c-addr -- ) right-channel w+! ;
 

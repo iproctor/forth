@@ -23,7 +23,7 @@ new-list-anchor constant active-voices
 : no-active-voices? ( -- flag ) active-voices list-anchor->list@ 0= ;
 \ true if voice is done
 : play-voice ( samps ring voice -- flag ) rot 0 U+DO
-    dup i swap voice>gen IF 2drop 2drop unloop true exit THEN
+    dup i sample-clock + swap voice>gen IF 2drop 2drop unloop true exit THEN
     ( ring voice n n )
     2>r over 2r> rot i swap ring-frame+!
   LOOP 2drop false ;
@@ -31,7 +31,7 @@ new-list-anchor constant active-voices
     ( prev-next )
     dup @ WHILE
     dup @ list->val @ 2r@ rot play-voice
-    IF dup list-rm-node ELSE list->next @ THEN
+    IF dup active-voices list-anchor-rm-node ELSE list->next @ THEN
   REPEAT drop 2rdrop ;
 
 : current-scene-and-offset ( -- 64th-offset scene ) 64ths-clock drop scene-list list-anchor->list@ BEGIN
@@ -46,9 +46,9 @@ new-list-anchor constant active-voices
   ]for-list drop ;
 : iteration-samples ( ring -- u ) ring-capacity 1-  samples-until-64th min ;
 : fire-pending-triggers ( -- flag ) current-scene-and-offset dup IF
-    fire-scene-triggers false ELSE no-active-voices? THEN ;
+    fire-scene-triggers false ELSE 2drop no-active-voices? THEN ;
 : orch-fill-ring ( ring -- flag ) BEGIN
-    dup iteration-samples dup 100 < IF 2drop false exit THEN
+    dup iteration-samples dup 0= IF 2drop false exit THEN
     on-64th? IF fire-pending-triggers IF 2drop true exit THEN THEN
     dup >r  over play-voices
     r> v. advance-sample-clock  over ring-adv-write

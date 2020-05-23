@@ -27,7 +27,7 @@ require instrument.fs
 : seq-trig-at-offset ( 64ths scn-slot -- trigger )
   v. adjust-offset-for-loop swap IF 2drop 0 exit THEN
   v. scn-step-from-64ths swap 0= IF 2drop 0 exit THEN
-  scn-slot-nth-trig ;
+  scn-slot-nth-trig dup trigger-type @ trigger:note <> IF drop 0 THEN ;
 
 : scn-slot-play-trigger ( trigger scn-slot -- voice ) scn-slot>instrument @ instrument-play-trigger ;
 
