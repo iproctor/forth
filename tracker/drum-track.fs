@@ -14,8 +14,8 @@ require orchestrator.fs
 : qn1 <e5> <-> <-> <-> ;
 : qn2 <a5> <-> <-> <-> ;
 : qn3 <-> <-> <a5> <-> ;
-: qn4 <e5> <-> <a5> <-> ;
- <| qn1 qrest qn2 qrest  qn3 qn4 qrest qrest |> constant synseq
+: qn4 <-> <e5> <-> <e5> ;
+ <| qn3 qrest qn1 qrest  qn3 qn4 qn2 qrest |> constant synseq
 \ <| qn1 qrest qrest qrest |> constant synseq
 
 new-scene constant scene0

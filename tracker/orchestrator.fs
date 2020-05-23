@@ -1,5 +1,6 @@
 require ../audio/portaudio.fs
 require ../ds/list.fs
+require ../ds/dlist.fs
 require scene.fs
 require ../audio/ring.fs
 require bpm.fs
@@ -18,20 +19,20 @@ require ../utils.fs
 new-list-anchor constant scene-list
 : add-scene ( scene -- ) scene-list list-anchor-append ;
 
-new-list-anchor constant active-voices
-: add-active-voice ( voice -- ) dup voice>t0 sample-clock swap !  active-voices list-anchor-append ;
-: no-active-voices? ( -- flag ) active-voices list-anchor->list@ 0= ;
+dlist-new-head constant active-voices
+: add-active-voice ( voice -- ) dup voice>t0 sample-clock swap !  active-voices dlist-ins-after ;
+: active-voices-start active-voices dlist>next@ ;
+: no-active-voices? ( -- flag ) active-voices-start 0= ;
 \ true if voice is done
 : play-voice ( samps ring voice -- flag ) rot 0 U+DO
     dup i sample-clock + swap voice>gen IF 2drop 2drop unloop true exit THEN
     ( ring voice n n )
     2>r over 2r> rot i swap ring-frame+!
   LOOP 2drop false ;
-: play-voices ( u ring -- ) 2>r active-voices list-anchor->list BEGIN
-    ( prev-next )
-    dup @ WHILE
-    dup @ list->val @ 2r@ rot play-voice
-    IF ." rm voice" cr dup active-voices list-anchor-rm-node ELSE list->next @ THEN
+: play-voices ( u ring -- ) 2>r active-voices-start BEGIN
+    dup WHILE
+    dup dlist>val@ 2r@ rot play-voice
+    IF ." rm voice" cr v. dlist>next@ dlist-rm-node ELSE dlist>next@ THEN
   REPEAT drop 2rdrop ;
 
 : current-scene-and-offset ( -- 64th-offset scene ) 64ths-clock drop scene-list list-anchor->list@ BEGIN
