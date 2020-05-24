@@ -36,6 +36,12 @@ dlist-new-head constant active-voices
     IF ." rm voice" cr v. dlist>next@ dlist-rm-node ELSE dlist>next@ THEN
   REPEAT drop 2rdrop ;
 
+0 value effects
+: register-effect ( data xt -- ) effects list-prepend2 to effects ;
+\ For each effect, call xt with n samples and ring. Effect advances n samples and writes n samples
+\ to ring.
+: effects-process ( u ring -- ) effects for-list[ v 2dup list->val 2@ execute ]for-list 2drop ;
+
 : current-scene-and-offset ( -- 64th-offset scene ) 64ths-clock drop scene-list list-anchor->list@ BEGIN
     dup WHILE
     dup >r list->val@ scene-dur CASE
@@ -51,9 +57,10 @@ dlist-new-head constant active-voices
     fire-scene-triggers false ELSE 2drop no-active-voices? THEN ;
 : orch-fill-ring ( ring -- flag ) BEGIN
     dup iteration-samples dup 0= IF 2drop false exit THEN
+    dup . cr
     on-64th? IF fire-pending-triggers IF 2drop true exit THEN THEN
     dup >r  over play-voices
-    r> v. advance-sample-clock  over ring-adv-write
+    r> v. advance-sample-clock  over 2dup effects-process ring-adv-write
   AGAIN drop false ;
 
 : orch-fill-loop ( ring -- ) BEGIN
