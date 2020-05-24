@@ -16,6 +16,7 @@ require portaudio.fs
 : frames ( u -- u ) \frame * ;
 : left-channel ( c-addr -- c-addr ) ;
 : right-channel ( c-addr -- c-addr ) sample-bytes + ;
+: read-frame ( c-addr -- n n ) v. left-channel right-channel v sw@ sw@ ;
 : clip-sample ( n -- n ) dup abs max-sample-mag > IF ." CLIPPING " dup . .s cr THEN  max-sample-mag min  max-sample-mag negate  max ;
 : w+! ( n c-addr -- ) tuck sw@ + clip-sample swap  w! ;
 : add-left ( n c-addr -- ) left-channel w+! ;
@@ -42,9 +43,11 @@ require portaudio.fs
 : ring-adv-write ( u ring -- ) dup >r frame-write-offset-index  barrier  r> ring>write-ptr ! ;
 
 : ring-at-read ( ring -- c-addr ) v. ring>data ring>read-ptr@ frames + ;
+: ring-read-offset ( u ring -- u ) ring>read-ptr@ + frame-count mod ;
+: ring-at-read-offset ( u ring -- c-addr ) dup >r ring-read-offset frames r> ring>data + ;
 \ Wont wrap
 : erase-from-read ( u ring -- ) v frames ring-at-read swap erase ;
-: ring-adv-read ( u ring -- ) 2dup erase-from-read  swap over ring>read-ptr@ + frame-count mod  swap ring>read-ptr ! ;
+: ring-adv-read ( u ring -- ) 2dup erase-from-read  v. ring-read-offset ring>read-ptr ! ;
 : frames-after-read ( ring -- u ) ring>read-ptr@ frame-count swap - ;
 
 \ Returns frames written
@@ -55,7 +58,7 @@ require portaudio.fs
 : ring-read ( c-addr u ring -- u ) dup read-after-write? IF dup >r read-until-end r> swap ELSE 0 THEN
   >r over 0= IF drop 2drop r> exit THEN
   dup >r v. ring>write-ptr@ ring>read-ptr@ - min  r> read-and-adv  r> + ;
-: ring-read-1 ( ring -- n n ) dup ring-at-read v. left-channel right-channel v sw@ sw@
+: ring-read-1 ( ring -- n n ) dup ring-at-read read-frame
   rot dup 1 swap erase-from-read  1 swap ring-adv-read ;
 : ring-transfer ( from-ring to-ring u -- ) 0 U+DO
     2dup swap ring-read-1 rot i swap ring-frame+!
