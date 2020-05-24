@@ -41,9 +41,10 @@ create path-buf 256 allot
   ." trigger sample " over sample>name type cr
   swap sample>gen new-wav-voice ;
 
+: sample-instrument>samples 2 cells + @ ;
 : sample-instrument>offset 3 cells + @ ;
 : samples-trigger-note ( u u instrument -- voice )
-  >r note-to-note-index  r@ sample-instrument>offset -  cells r@ instrument>data + @
+  >r note-to-note-index  r@ sample-instrument>offset -  cells r@ sample-instrument>samples + @
   r> trigger-sample ;
 
-: new-samples-instrument ( r:gain offset samples -- instrument ) ['] samples-trigger-note  4 cells allocz  v. 2!  dup >r 2 cells + f!  r@ 3 cells + ! r> ;
+: new-samples-instrument ( r:gain offset samples -- instrument ) 4 cells allocz >r  ['] samples-trigger-note r@ !  r@ cell+ f!  r@ 2 cells + !  r@ 3 cells + !  r> ;

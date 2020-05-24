@@ -55,6 +55,8 @@ require ../utils.fs
   >r over 0= IF drop 2drop r> exit THEN
   dup >r v. ring>write-ptr@ ring>read-ptr@ - min  r> read-and-adv  r> + ;
 
+: ring-read-1 ( ring -- n n ) dup ring-at-read v. left-channel right-channel v @ @  rot 1 ring-adv-write ;
+
 : ring-pa-callback { ibuf obuf fpb ti sf ring -- n } obuf fpb \frame * erase  obuf fpb ring ring-read drop  ring ring-count IF 0 ELSE 1 THEN ;
 
 ' ring-pa-callback pa-stream-callback: constant ring-cb
