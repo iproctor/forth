@@ -1,11 +1,12 @@
 require ../combis.fs
 require ../utils.fs
+require portaudio.fs
 
 \ 48khz, 16 bit samples, 2 channels, 100ms
 2 value channels
 48000 value sample-rate
 2 value sample-bytes
-50 value buf-dur-ms
+5000 value buf-dur-ms
 
 : \frame channels sample-bytes * ;
 : frame-count sample-rate buf-dur-ms * 1000 / ;
@@ -15,7 +16,7 @@ require ../utils.fs
 : frames ( u -- u ) \frame * ;
 : left-channel ( c-addr -- c-addr ) ;
 : right-channel ( c-addr -- c-addr ) sample-bytes + ;
-: clip-sample ( n -- n ) max-sample-mag min  max-sample-mag negate  max ;
+: clip-sample ( n -- n ) dup abs max-sample-mag > IF ." CLIPPING " dup . .s cr THEN  max-sample-mag min  max-sample-mag negate  max ;
 : w+! ( n c-addr -- ) tuck sw@ + clip-sample swap  w! ;
 : add-left ( n c-addr -- ) left-channel w+! ;
 : add-right ( n c-addr -- ) right-channel w+! ;
@@ -54,7 +55,8 @@ require ../utils.fs
 : ring-read ( c-addr u ring -- u ) dup read-after-write? IF dup >r read-until-end r> swap ELSE 0 THEN
   >r over 0= IF drop 2drop r> exit THEN
   dup >r v. ring>write-ptr@ ring>read-ptr@ - min  r> read-and-adv  r> + ;
-: ring-read-1 ( ring -- n n ) dup ring-at-read v. left-channel right-channel v @ @  rot 1 swap ring-adv-read ;
+: ring-read-1 ( ring -- n n ) dup ring-at-read v. left-channel right-channel v sw@ sw@
+  rot dup 1 swap erase-from-read  1 swap ring-adv-read ;
 : ring-transfer ( from-ring to-ring u -- ) 0 U+DO
     2dup swap ring-read-1 rot i swap ring-frame+!
   LOOP 2drop ;

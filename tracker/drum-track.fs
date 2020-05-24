@@ -5,14 +5,15 @@ require delay.fs
 0  s" samples/KickDrum/" load-samples drop 0.3e new-samples-instrument constant kickdrum
 0  s" samples/SnareDrum/" load-samples drop 0.3e new-samples-instrument constant snaredrum
 3 4 note-to-note-index s" samples/SynPiano/" load-samples drop 0.3e new-samples-instrument constant synpiano
-0.1e 0.0e  128 bpm 64ths->samples  synpiano  add-delay constant synpianodelay
+0.3e 0.0e  24 bpm 64ths->samples  synpiano add-delay constant synpianodelay
 synpianodelay  ' delay-effect-process  register-effect
 
 : qdrum <d0> <-> <-> <-> ;
 : qdrum2 <-> <-> <d0> <-> ;
 : qrest <-> <-> <-> <-> ;
 
-<| qdrum qdrum2 qdrum2 qdrum |> constant kickseq
+\ <| qdrum qdrum2 qdrum2 qdrum |> constant kickseq
+<| qdrum qrest qdrum qrest |> constant kickseq
 <| qrest qdrum qrest qdrum |> constant snareseq
 
 : qn1 <e5> <-> <-> <-> ;
@@ -20,7 +21,7 @@ synpianodelay  ' delay-effect-process  register-effect
 : qn3 <-> <-> <a5> <-> ;
 : qn4 <-> <e5> <-> <e5> ;
 \ <| qn3 qrest qn1 qrest  qn3 qn4 qn2 qrest |> constant synseq
-<| qn1 qrest qrest qrest |> constant synseq
+<| qn1 qrest qrest qrest qrest qrest qrest qrest |> constant synseq
 
 new-scene constant scene0
 \ kickseq kickdrum true 0 scene0 add-to-scene

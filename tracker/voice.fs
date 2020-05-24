@@ -6,6 +6,7 @@ require instrument.fs
 : voice>gen-xt ( voice -- c-addr ) ;
 : voice>destr-xt ( voice -- c-addr ) voice>gen-xt cell+ ;
 : voice>t0 ( voice -- c-addr ) voice>destr-xt cell+ ;
+: voice>t0@ ( voice -- c-addr ) voice>t0 @ ;
 : voice>instrument ( voice -- c-addr ) voice>t0 cell+ ;
 : scale-sample ( n r -- n ) s>f f* f>s ;
 : scale-samples ( n n r -- n n ) fdup v scale-sample scale-sample ;

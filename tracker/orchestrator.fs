@@ -28,7 +28,7 @@ dlist-new-head constant active-voices
 : play-voice ( samps ring voice -- flag ) rot 0 U+DO
     dup i sample-clock + swap voice>gen IF 2drop 2drop unloop true exit THEN
     ( ring voice n n )
-    2>r over 2r> rot i swap ring-frame+!
+    2>r over 2r> rot i swap  ( ." pv" .s cr ) ring-frame+!
   LOOP 2drop false ;
 : play-voices ( u ring -- ) 2>r active-voices-start BEGIN
     dup WHILE
@@ -57,7 +57,6 @@ dlist-new-head constant active-voices
     fire-scene-triggers false ELSE 2drop no-active-voices? THEN ;
 : orch-fill-ring ( ring -- flag ) BEGIN
     dup iteration-samples dup 0= IF 2drop false exit THEN
-    dup . cr
     on-64th? IF fire-pending-triggers IF 2drop true exit THEN THEN
     dup >r  over play-voices
     r> v. advance-sample-clock  over 2dup effects-process ring-adv-write
