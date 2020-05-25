@@ -2,7 +2,7 @@ require ../combis.fs
 require ../audio/ring.fs
 require sequence.fs
 
-1 15 lshift constant max-16bit-sample
+1 15 lshift 1- constant max-16bit-sample
 
 \ assume 16bit samples
 : interp-components ( len i len' -- m r:l ) 1- >r v 1- * s>f r> s>f f/ fdup floor fdup f>s f- ;
@@ -22,5 +22,9 @@ create sin-sample 128 2* allot
   LOOP ;
 fill-sin
 
-create square-sample 1e f, 0e f,
-2 constant \square-sample
+create square-sample 64 2* allot
+64 constant \square-sample
+: fill-sq \square-sample 0 U+DO
+    max-16bit-sample  i \square-sample 2 / < IF negate THEN  square-sample i 2* + w!
+  LOOP ;
+fill-sq
