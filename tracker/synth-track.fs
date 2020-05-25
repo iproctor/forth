@@ -5,11 +5,12 @@ require single-cycle.fs
 
 0.5e sin-sample \sin-sample new-single-cycle-instrument constant sin-inst
 0.5e square-sample \square-sample new-single-cycle-instrument constant square-inst
+0.5e saw-sample \square-sample new-single-cycle-instrument constant saw-inst
 
  <| <c2> <-> <e2> <-> <g2> <-> <c3> <-> <e3> <-> <g3> <-> <c4> <-> <e4> <-> <g4> <-> |> constant synseq
 
 new-scene constant scene0
-synseq square-inst true -1 scene0 add-to-scene
+synseq saw-inst true 0 scene0 add-to-scene
 
 scene0 add-scene
 

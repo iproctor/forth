@@ -10,15 +10,14 @@ require sequence.fs
 : sample-delta ( frames u -- n ) 2dup 1+ sample-at v sample-at swap - ;
 : interpolate ( frames len i len' -- n ) 2dup 1- = IF 2drop 1- sample-at exit THEN
   interp-components 2dup sample-delta s>f f* sample-at s>f f+ f>s ;
-: interpolate-stereo ( frames len i len' -- n n ) ;
 
 : pitch-of-note ( u u -- r ) note-to-note-index 48 - 440e 1.059463094359e s>f f** f* ;
 : pitch-to-samples ( r -- u ) sample-rate s>f fswap f/ f>s ;
 
-create sin-sample 128 2* allot
-128 constant \sin-sample
-: fill-sin 128 0 U+DO
-    i s>f 128e f/ 3.14159e f2* f* fsin max-16bit-sample s>f f* f>s sin-sample i 2* + w!
+512 constant \sin-sample
+create sin-sample \sin-sample 2* allot
+: fill-sin \sin-sample 0 U+DO
+    i s>f \sin-sample s>f f/ 3.141592e f2* f* fsin max-16bit-sample s>f f* f>s sin-sample i 2* + w!
   LOOP ;
 fill-sin
 
@@ -28,3 +27,10 @@ create square-sample 64 2* allot
     max-16bit-sample  i \square-sample 2 / < IF negate THEN  square-sample i 2* + w!
   LOOP ;
 fill-sq
+
+64 constant \saw-sample
+create saw-sample \saw-sample 2* allot
+: fill-saw \saw-sample 0 U+DO
+    i s>f \saw-sample s>f f/ f2* 1e f- max-16bit-sample s>f f* f>s saw-sample i 2* + w!
+  LOOP ;
+fill-saw
