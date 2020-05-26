@@ -13,24 +13,3 @@ require sequence.fs
 
 : pitch-of-note ( u u -- r ) note-to-note-index 48 - 440e 1.059463094359e s>f f** f* ;
 : pitch-to-samples ( r -- u ) sample-rate s>f fswap f/ f>s ;
-
-512 constant \sin-sample
-create sin-sample \sin-sample 2* allot
-: fill-sin \sin-sample 0 U+DO
-    i s>f \sin-sample s>f f/ 3.141592e f2* f* fsin max-16bit-sample s>f f* f>s sin-sample i 2* + w!
-  LOOP ;
-fill-sin
-
-create square-sample 64 2* allot
-64 constant \square-sample
-: fill-sq \square-sample 0 U+DO
-    max-16bit-sample  i \square-sample 2 / < IF negate THEN  square-sample i 2* + w!
-  LOOP ;
-fill-sq
-
-64 constant \saw-sample
-create saw-sample \saw-sample 2* allot
-: fill-saw \saw-sample 0 U+DO
-    i s>f \saw-sample s>f f/ f2* 1e f- max-16bit-sample s>f f* f>s saw-sample i 2* + w!
-  LOOP ;
-fill-saw
