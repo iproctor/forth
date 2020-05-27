@@ -5,7 +5,7 @@ require ../ds/list.fs
 
 0 constant trigger:rest
 1 constant trigger:note
-32 constant default-dur \ a 16th note, implies that a sequence of 16 has total dur of 32 * 16 = 512
+4 constant default-dur \ a 16th note
 
 0 value cur-seq
 
@@ -16,6 +16,7 @@ require ../ds/list.fs
 
 : trigger-type ( trigger -- c-addr ) ;
 : trigger-dur ( trigger -- c-addr ) cell+ ;
+: trigger-dur@ ( trigger -- c-addr ) trigger-dur @ ;
 : trigger-notes ( trigger -- c-addr ) trigger-dur cell+ ;
 : trigger-notes2! ( u u trigger -- ) trigger-notes 2! ;
 : init-trig ( trigger u u -- ) >r over trigger-type !  r> swap trigger-dur ! ;
@@ -28,6 +29,7 @@ create note-names s" a" 2, s" a#" 2, s" b" 2, s" c" 2, s" c#" 2, s" d" 2, s" d#"
 : hold-str ( c-addr u -- ) BEGIN dup WHILE 2dup + 1- c@ hold  1- REPEAT 2drop ;
 : note-index-to-note ( u -- u u ) 12 /mod ;
 : note-to-note-index ( u u -- u ) 12 * + ;
+: trigger-note-index ( trigger -- u ) trigger-notes 2@ note-to-note-index ;
 
 : def-notes 12 0 U+DO octaves 0 U+DO <<# [CHAR] > hold i 0 #s j note-to-name hold-str [CHAR] < hold #> nextname : j POSTPONE literal i POSTPONE literal POSTPONE new-note POSTPONE ;  #>> LOOP LOOP ;
 def-notes

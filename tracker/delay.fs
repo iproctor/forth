@@ -35,11 +35,11 @@ end-struct delay-voice%
 
 : new-delay-voice ( subvoice instrument -- voice ) swap delay-voice% %alloc >r
   r@ delay-voice>subvoice !  ['] delay-gen ['] delay-destr r> v. voice-init ;
-: delay-trigger ( note oct instrument -- voice ) dup >r delay>instrument @ instrument-trigger r> new-delay-voice ;
+: delay-trigger ( note-ind dur instrument -- voice ) dup >r delay>instrument @ instrument-trigger r> new-delay-voice ;
 
 : delay-init-ring ( delay -- ) init-ring  2dup v delay>period@ ring-adv-write  swap delay>ring ! ;
-: add-delay ( r:level r:feedback period instrument -- instrument )
-  delay% %alloc >r  ['] delay-trigger 1e r@ instrument-init  r@ delay>instrument !  r@ delay>feedback f!  r@ delay>level f!  r@ delay>period !  r@ delay-init-ring  r> ;
+: add-delay ( r:level r:feedback period instrument -- instrument ) delay% %alloc >r
+  ['] delay-trigger 1e r@ instrument-init  r@ delay>instrument !  r@ delay>feedback f!  r@ delay>level f!  r@ delay>period !  r@ delay-init-ring  r> ;
 
 : delay-adv-write ( u delay -- ) 2dup delay>ring @ ring-adv-write  delay>clock +! ;
 : delay-add-feedback ( u delay ) { u delay } u 0 U+DO

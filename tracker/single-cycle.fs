@@ -18,10 +18,11 @@ end-struct single-cycle-voice%
 : single-cycle-gen ( u scvoice -- n n flag ) 2dup single-cycle-voice>dur @ >= IF 2drop 0 0 true exit THEN
   >r r@ single-cycle-voice>sample-len @ v. mod r> single-cycle-voice>waveform 2swap interpolate dup false ;
 
-: single-cycle-trigger ( u u instrument -- voice )
+: single-cycle-trigger ( note dur instrument -- voice )
   ['] single-cycle-gen ['] single-cycle-destr single-cycle-voice% %alloc v. voice-init >r
+  r@ single-cycle-voice>dur !
   pitch-of-note pitch-to-samples  r@ single-cycle-voice>sample-len !
-  4000 r@ single-cycle-voice>dur ! r> ;
+  r> ;
 
 : new-single-cycle-instrument ( r: gain waveform waveform-len --- instrument ) single-cycle% %alloc >r
   ['] single-cycle-trigger r@ instrument-init  r@ single-cycle>\waveform !  r@ single-cycle>waveform ! r> ;

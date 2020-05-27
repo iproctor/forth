@@ -48,8 +48,8 @@ end-struct sample-instrument%
 
 : sample-instrument>samples@ sample-instrument>samples @ ;
 : sample-instrument>offset@ sample-instrument>offset @ ;
-: samples-trigger-note ( u u instrument -- voice )
-  >r note-to-note-index  r@ sample-instrument>offset@ -  cells r@ sample-instrument>samples@ + @
+: samples-trigger-note ( u dur instrument -- voice )
+  nip >r r@ sample-instrument>offset@ -  cells r@ sample-instrument>samples@ + @
   r> trigger-sample ;
 
 : new-samples-instrument ( r:gain offset samples -- instrument ) sample-instrument% %alloc >r  ['] samples-trigger-note r@ instrument-init  r@ sample-instrument>samples !  r@ sample-instrument>offset !  r> ;

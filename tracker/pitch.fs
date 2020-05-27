@@ -11,5 +11,5 @@ require sequence.fs
 : interpolate ( frames len i len' -- n ) 2dup 1- = IF 2drop 1- sample-at exit THEN
   interp-components 2dup sample-delta s>f f* sample-at s>f f+ f>s ;
 
-: pitch-of-note ( u u -- r ) note-to-note-index 48 - 440e 1.059463094359e s>f f** f* ;
+: pitch-of-note ( u -- r ) 48 - 440e 1.059463094359e s>f f** f* ;
 : pitch-to-samples ( r -- u ) sample-rate s>f fswap f/ f>s ;

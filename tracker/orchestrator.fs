@@ -9,7 +9,6 @@ require ../utils.fs
 
 0 value sample-clock
 : advance-sample-clock ( u -- ) sample-clock + to sample-clock ;
-100 value bpm
 
 : samples-per-64th 1 bpm 64ths->samples ;
 : 64ths-clock ( -- u flag ) sample-clock samples-per-64th /mod swap 0= ;

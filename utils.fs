@@ -33,3 +33,4 @@ require combis.fs
 : /mod-round-up ( n n -- n n ) dup >r /mod swap dup IF r> swap - swap 1+ ELSE swap rdrop THEN ;
 
 : && ( w w -- flag ) v 0<> 0<> and ;
+
