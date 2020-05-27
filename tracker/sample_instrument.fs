@@ -35,16 +35,21 @@ create path-buf 256 allot
   2drop
   r> list-anchor-to-list list-to-arr 2dup sample-sort ;
 
-: new-wav-voice ( instrument xt -- voice ) 4 cells allocz >r  r@ voice>gen-xt !  ['] wav-destr r@ voice>destr-xt !  r@ voice>instrument !  r> ;
+: new-wav-voice ( instrument xt -- voice )  ['] wav-destr  voice% %alloc  v. voice-init ;
 
 : trigger-sample ( sample instrument -- voice )
   ." trigger sample " over sample>name type cr
   swap sample>gen new-wav-voice ;
 
-: sample-instrument>samples 2 cells + @ ;
-: sample-instrument>offset 3 cells + @ ;
+instrument%
+  cell% field sample-instrument>samples
+  cell% field sample-instrument>offset
+end-struct sample-instrument%
+
+: sample-instrument>samples@ sample-instrument>samples @ ;
+: sample-instrument>offset@ sample-instrument>offset @ ;
 : samples-trigger-note ( u u instrument -- voice )
-  >r note-to-note-index  r@ sample-instrument>offset -  cells r@ sample-instrument>samples + @
+  >r note-to-note-index  r@ sample-instrument>offset@ -  cells r@ sample-instrument>samples@ + @
   r> trigger-sample ;
 
-: new-samples-instrument ( r:gain offset samples -- instrument ) 4 cells allocz >r  ['] samples-trigger-note r@ !  r@ cell+ f!  r@ 2 cells + !  r@ 3 cells + !  r> ;
+: new-samples-instrument ( r:gain offset samples -- instrument ) sample-instrument% %alloc >r  ['] samples-trigger-note r@ instrument-init  r@ sample-instrument>samples !  r@ sample-instrument>offset !  r> ;

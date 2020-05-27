@@ -7,7 +7,7 @@ require delay.fs
 0  s" samples/KickDrum/" load-samples drop 0.3e new-samples-instrument constant kickdrum
 0  s" samples/SnareDrum/" load-samples drop 0.3e new-samples-instrument constant snaredrum
 3 4 note-to-note-index s" samples/SynPiano/" load-samples drop 0.3e new-samples-instrument constant synpiano
-0.3e 0.7e  24 bpm 64ths->samples  synpiano add-delay constant synpianodelay
+0.6e 0.7e  24 bpm 64ths->samples  synpiano add-delay constant synpianodelay
 synpianodelay  ' delay-effect-process  register-effect
 
 : qdrum <d0> <-> <-> <-> ;

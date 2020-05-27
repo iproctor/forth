@@ -3,13 +3,16 @@ require ../ds/list.fs
 require sequence.fs
 require instrument.fs
 
-: scn-slot>seq ;
-: scn-slot>seq@ @ ;
-: scn-slot>instrument cell+ ;
-: scn-slot>loop 2 cells + ;
+struct
+  cell% field scn-slot>seq
+  cell% field scn-slot>instrument
+  cell% field scn-slot>loop
+  cell% field scn-slot>multiplier
+end-struct scn-slot%
+
+: scn-slot>seq@ scn-slot>seq @ ;
 \ multiplier is power of 2 exponent on speed of playback. range is -4 (whole note steps) to 2 (64th steps. 0 is 16th steps)
-: scn-slot>multiplier 3 cells + ;
-: new-scn-slot ( seq inst loop? mult -- scn-slot ) 4 cells allocz v. 4!r ;
+: new-scn-slot ( seq inst loop? mult -- scn-slot ) scn-slot% %alloc v. 4!r ;
 
 : scn-slot-scn-steps ( scn-slot -- u ) scn-slot>seq @ list-n ;
 \ in 64ths
@@ -34,10 +37,13 @@ require instrument.fs
 : scn-slot-fire-trigger-at ( 64ths scn-slot -- voice )
   tuck seq-trig-at-offset dup 0= IF nip exit THEN swap scn-slot-play-trigger ;
 
-: scene>slots ;
-\ dur in 64th steps. if 0 the length of the longest non looping seq, or inf
-: scene>dur cell+ ;
-: new-scene new-list-anchor 2 cells allocz v. ! ;
+struct
+  cell% field scene>slots
+  \ dur in 64th steps. if 0 the length of the longest non looping seq, or inf
+  cell% field scene>dur
+end-struct scene%
+
+: new-scene new-list-anchor 0 scene% %alloc v. 2!r ;
 \ in 64ths
 : add-scn-slot-dur ( n n -- n ) over -1 = IF 2drop -1 ELSE dup -1 = IF nip ELSE max THEN THEN ;
 : scene-dur ( scene -- u ) dup scene>dur @ dup IF nip exit THEN drop  scene>slots @ list-anchor->list@  0 swap  for-list[ list->val @ scn-slot-dur add-scn-slot-dur ]for-list ;
