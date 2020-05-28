@@ -61,7 +61,7 @@ require portaudio.fs
 : ring-read-1 ( ring -- n n ) dup ring-at-read read-frame
   rot dup 1 swap erase-from-read  1 swap ring-adv-read ;
 : ring-transfer ( from-ring to-ring u -- ) 0 U+DO
-    2dup swap ring-read-1 rot i swap ring-frame+!
+    2dup v ring-read-1 i swap ring-frame+!
   LOOP 2drop ;
 
 : ring-pa-callback { ibuf obuf fpb ti sf ring -- n } obuf fpb \frame * erase  obuf fpb ring ring-read drop  ring ring-count IF 0 ELSE 1 THEN ;

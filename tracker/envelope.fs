@@ -50,8 +50,7 @@ end-struct envel-voice%
 : new-envel-voice ( dur subvoice envel -- envel-voice ) ['] envel-gen ['] envel-destr envel-voice% %alloc v. voice-init >r r@ envel-voice>subvoice ! r@ envel-voice>dur ! r> ;
 
 : envel-add-rel ( dur inst -- dur ) envel>release @ + ;
-: envel>trigger ( note dur inst -- voice ) v. envel-add-rel v tuck envel>inst @ v. instrument-trigger
-  new-envel-voice ;
+: envel>trigger ( note dur inst -- voice ) >r r@ envel-add-rel tuck r@ envel>inst @ instrument-trigger r> new-envel-voice ;
 
 : add-envelope ( a d s r inst -- inst ) ['] envel>trigger 1e envel% %alloc v. instrument-init >r
   r@ envel>inst !  r@ envel>release !  r@ envel>sustain f!  r@ envel>decay !  r@ envel>attack !
