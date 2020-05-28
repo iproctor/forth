@@ -31,7 +31,7 @@ end-struct delay-voice%
 : delay-voice-write-sample ( n n u delay-voice -- ) 2>r r@ delay-voice>level@ scale-samples 2r> v. delay-sub-clock  delay-voice>ring  ( ." dws" .s cr ) ring-frame+! ;
 : delay-gen ( u delay-voice -- n n flag ) 2>r 2r@ delay-voice-run-subvoice IF 2rdrop true exit THEN
   2dup 2r> delay-voice-write-sample false ;
-: delay-destr ;
+: delay-destr delay-voice>subvoice @ voice-free ;
 
 : new-delay-voice ( subvoice instrument -- voice ) swap delay-voice% %alloc >r
   r@ delay-voice>subvoice !  ['] delay-gen ['] delay-destr r> v. voice-init ;

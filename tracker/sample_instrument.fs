@@ -5,7 +5,7 @@ require ../audio/wav.fs
 : mk-wav-gen-body ( compilation: wav -- runtime: u voice -- n n flag ) { wav } ]] drop dup [[ wav wav->n ]] literal >= IF
   drop 0 0 true ELSE [[ wav mk-wav->stereo-sample ]] false THEN [[ ;
 : mk-wav-gen ( wav -- xt ) >r :noname r> mk-wav-gen-body POSTPONE ; ;
-: wav-destr ;
+: wav-destr drop ;
 
 \ Sample loading
 create path-buf 256 allot

@@ -14,7 +14,7 @@ end-struct single-cycle-voice%
 
 : single-cycle-voice>waveform ( scvoice -- c-addr u ) voice>instrument @ v. single-cycle>waveform single-cycle>\waveform v @ @ ;
 
-: single-cycle-destr ;
+: single-cycle-destr drop ;
 : single-cycle-gen ( u scvoice -- n n flag ) 2dup single-cycle-voice>dur @ >= IF 2drop 0 0 true exit THEN
   >r r@ single-cycle-voice>sample-len @ v. mod r> single-cycle-voice>waveform 2swap interpolate dup false ;
 
