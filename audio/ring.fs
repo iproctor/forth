@@ -6,7 +6,7 @@ require portaudio.fs
 2 value channels
 48000 value sample-rate
 2 value sample-bytes
-5000 value buf-dur-ms
+100 value buf-dur-ms
 
 : \frame channels sample-bytes * ;
 : frame-count sample-rate buf-dur-ms * 1000 / ;
@@ -26,16 +26,17 @@ require portaudio.fs
 : ring>read-ptr@ ( ring -- c-addr ) ring>read-ptr @ ;
 : ring>write-ptr ( ring -- c-addr ) ring>read-ptr cell+ ;
 : ring>write-ptr@ ( ring -- c-addr ) ring>write-ptr @ ;
-: ring>sz ( ring -- u ) ring>write-ptr cell+ @ ;
-: ring>data ( ring -- c-addr ) ring>write-ptr 2 cells + ;
-: init-ring ( -- ring ) 3 cells \ring + allocz ;
+: ring>fcount ( ring -- u ) ring>write-ptr cell+ ;
+: ring>data ( ring -- c-addr ) ring>fcount cell+ ;
+: init-ring-fc ( u -- ring ) dup \frame * 3 cells + allocz swap over ring>fcount ! ;
+: init-ring ( -- ring ) frame-count init-ring-fc ;
 : read-after-write? ( ring -- flag ) v. ring>read-ptr@ ring>write-ptr@ > ;
 
 \ Writes
-: ring-capacity ( ring -- u ) dup read-after-write? IF v. ring>read-ptr@ ring>write-ptr@ - ELSE v. ring>write-ptr@ ring>read-ptr@ - frame-count swap - THEN ;
-: ring-count ring-capacity frame-count swap - ;
+: ring-capacity ( ring -- u ) >r r@ read-after-write? IF r> v. ring>read-ptr@ ring>write-ptr@ - ELSE r@ v. ring>write-ptr@ ring>read-ptr@ - r> ring>fcount @ swap - THEN ;
+: ring-count ( ring -- u ) v. ring-capacity ring>fcount @ swap - ;
 : ring-capacity-ms ( ring -- u ) ring-capacity 1000 * sample-rate / ;
-: frame-write-offset-index ( u ring -- u ) ring>write-ptr@ + frame-count mod ;
+: frame-write-offset-index ( u ring -- u ) >r r@ ring>write-ptr@ + r> ring>fcount @ mod ;
 : frame-at-write-offset ( u ring -- c-addr ) dup >r frame-write-offset-index frames r> ring>data + ;
 
 \ Mixes a frame at offset
@@ -43,12 +44,12 @@ require portaudio.fs
 : ring-adv-write ( u ring -- ) dup >r frame-write-offset-index  barrier  r> ring>write-ptr ! ;
 
 : ring-at-read ( ring -- c-addr ) v. ring>data ring>read-ptr@ frames + ;
-: ring-read-offset ( u ring -- u ) ring>read-ptr@ + frame-count mod ;
+: ring-read-offset ( u ring -- u ) >r r@ ring>read-ptr@ + r> ring>fcount @ mod ;
 : ring-at-read-offset ( u ring -- c-addr ) dup >r ring-read-offset frames r> ring>data + ;
 \ Wont wrap
 : erase-from-read ( u ring -- ) v frames ring-at-read swap erase ;
 : ring-adv-read ( u ring -- ) 2dup erase-from-read  v. ring-read-offset ring>read-ptr ! ;
-: frames-after-read ( ring -- u ) ring>read-ptr@ frame-count swap - ;
+: frames-after-read ( ring -- u ) v. ring>read-ptr@ ring>fcount @ swap - ;
 
 \ Returns frames written
 : read-and-adv ( c-addr u ring -- u ) 2dup 2>r v frames ring-at-read -rot cmove  r> r@ swap ring-adv-read r> ;
